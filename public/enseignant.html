@@ -8,138 +8,127 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f0f0f0; min-height: 100vh; padding: 2rem; }
 
-    h1 { font-size: 1.25rem; font-weight: 700; color: #111; margin-bottom: 0.25rem; }
-    .sous-titre { font-size: 0.85rem; color: #888; margin-bottom: 1.75rem; }
-    .section { background: white; border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    .btn { padding: 0.65rem 1.25rem; border: none; border-radius: 9px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+    h1 { font-size: 1.2rem; font-weight: 700; color: #111; margin-bottom: 0.2rem; }
+    .sous-titre { font-size: 0.82rem; color: #999; margin-bottom: 1.5rem; }
+    .section { background: white; border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+    .btn { padding: 0.65rem 1.25rem; border: none; border-radius: 9px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
     .btn-principal { background: #111; color: white; }
     .btn-principal:hover { background: #333; }
     .btn-principal:disabled { background: #ccc; cursor: default; }
-    .btn-secondaire { background: #eee; color: #444; }
+    .btn-secondaire { background: #eee; color: #555; }
     .btn-secondaire:hover { background: #ddd; }
 
-    /* ── Écran 1 : Choix du jeu ── */
-    #ecran-jeux { max-width: 820px; }
-    .grille-jeux { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-    .carte-jeu { background: white; border: 2px solid #e8e8e8; border-radius: 14px; padding: 1.4rem; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; position: relative; }
-    .carte-jeu:hover:not(.bientot) { border-color: #111; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-    .carte-jeu.bientot { opacity: 0.45; cursor: default; }
-    .carte-jeu .icone { font-size: 2rem; margin-bottom: 0.75rem; }
-    .carte-jeu .nom-jeu { font-size: 1rem; font-weight: 600; color: #111; margin-bottom: 0.3rem; }
-    .carte-jeu .desc-jeu { font-size: 0.82rem; color: #777; line-height: 1.4; }
-    .badge-bientot { position: absolute; top: 0.75rem; right: 0.75rem; background: #f0f0f0; color: #999; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    /* ── Apprenants connectés (accueil) ── */
-    #section-connectes { margin-top: 1.5rem; }
-    .connectes-titre { font-size: 0.78rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+    /* ── Écran accueil ── */
+    .tag-connecte { display: inline-flex; align-items: center; gap: 0.4rem; background: #f0faf4; border: 1.5px solid #27ae60; color: #1e8449; border-radius: 20px; padding: 0.25rem 0.75rem; font-size: 0.85rem; font-weight: 600; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; animation: pulse 1.5s infinite; flex-shrink: 0; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1) } 50% { opacity:0.4; transform:scale(0.7) } }
     .connectes-liste { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .tag-connecte { display: inline-flex; align-items: center; gap: 0.45rem; background: #f0faf4; border: 1.5px solid #27ae60; color: #1e8449; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.88rem; font-weight: 600; }
-    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; animation: pulseVert 1.5s infinite; flex-shrink: 0; }
-    @keyframes pulseVert { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+    .connectes-titre { font-size: 0.75rem; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
 
-    /* ── Écran 2 : Config ── */
-    #ecran-config { max-width: 600px; }
-    .retour { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #888; cursor: pointer; margin-bottom: 1.25rem; background: none; border: none; padding: 0; }
+    /* ── Config ── */
+    .retour { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #999; cursor: pointer; margin-bottom: 1.25rem; background: none; border: none; padding: 0; }
     .retour:hover { color: #333; }
-    label { display: block; font-size: 0.78rem; font-weight: 600; color: #666; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: white; }
-    .rangee { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
-    .champ { display: flex; flex-direction: column; }
+    .champ-label { display: block; font-size: 0.75rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+    .champ-select { padding: 0.55rem 0.85rem; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.92rem; background: white; width: 100%; cursor: pointer; color: #111; }
+    .rangee { display: flex; gap: 1.25rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .champ { display: flex; flex-direction: column; flex: 1; min-width: 160px; }
 
-    /* ── Écran 3 : Lobby ── */
-    #ecran-lobby { max-width: 600px; }
+    /* ── Lobby ── */
     .lobby-entete { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
-    .compteur { font-size: 0.85rem; color: #888; white-space: nowrap; }
-    .compteur span { font-weight: 700; color: #111; }
-    .cartes-joueurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
-    .carte-joueur { background: #f8f8f8; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1rem; transition: border-color 0.3s, background 0.3s; }
+    .compteur { font-size: 0.85rem; color: #999; }
+    .compteur strong { color: #111; }
+    .cartes-joueurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.65rem; margin-bottom: 1.5rem; }
+    .carte-joueur { background: #f8f8f8; border: 2px solid #e8e8e8; border-radius: 11px; padding: 0.9rem; transition: border-color 0.25s, background 0.25s; }
     .carte-joueur.connecte { border-color: #27ae60; background: #f0faf4; }
-    .carte-joueur .nom-reel { font-size: 0.75rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
-    .statut-ligne { display: flex; align-items: center; gap: 0.5rem; }
-    .dot { width: 9px; height: 9px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
-    .carte-joueur.connecte .dot { background: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); }
+    .carte-joueur .nom-reel { font-size: 0.72rem; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem; }
+    .statut-ligne { display: flex; align-items: center; gap: 0.45rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
+    .carte-joueur.connecte .dot { background: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.15); }
     .nom-jeu-badge { font-size: 0.9rem; font-weight: 600; color: #111; }
     .statut-texte { font-size: 0.85rem; color: #bbb; font-style: italic; }
-    .lien-bloc { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.9rem 1rem; background: #f8f8f8; border-radius: 10px; margin-bottom: 1.25rem; }
-    .lien-label { font-size: 0.8rem; color: #888; font-weight: 500; white-space: nowrap; }
-    .lien-url { font-family: monospace; font-size: 0.9rem; color: #111; font-weight: 600; }
-    .btn-copier { padding: 0.3rem 0.7rem; background: #eee; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; color: #444; white-space: nowrap; }
+    .lien-bloc { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.85rem 1rem; background: #f8f8f8; border-radius: 9px; margin-bottom: 1.25rem; }
+    .lien-label { font-size: 0.78rem; color: #aaa; font-weight: 500; white-space: nowrap; }
+    .lien-url { font-family: monospace; font-size: 0.88rem; color: #111; font-weight: 600; word-break: break-all; }
+    .btn-copier { padding: 0.3rem 0.7rem; background: #eee; border: none; border-radius: 6px; font-size: 0.78rem; cursor: pointer; color: #555; white-space: nowrap; }
     .btn-copier:hover { background: #ddd; }
     .btn-copier.copie { background: #eafaf1; color: #27ae60; }
     .lancer-rangee { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .msg-attente { font-size: 0.85rem; color: #999; }
-    .msg-attente.pret { color: #27ae60; font-weight: 500; }
+    .msg-attente { font-size: 0.85rem; color: #bbb; }
+    .msg-attente.pret { color: #27ae60; font-weight: 600; }
 
-    /* ── Écran 4 : En jeu ── */
-    #ecran-jeu { max-width: 600px; }
-    .timer { font-size: 3rem; font-weight: 700; color: #111; text-align: center; padding: 0.5rem 0; }
-    .question-box { background: #f8f8f8; border-radius: 10px; padding: 1.2rem; margin-bottom: 1rem; }
-    .question-mot { font-size: 2rem; font-weight: 700; color: #111; }
-    .question-info { font-size: 0.85rem; color: #777; margin-top: 0.3rem; }
-    .joueurs-jeu { display: flex; flex-direction: column; gap: 0.5rem; }
-    .joueur-ligne { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; background: #f8f8f8; border-radius: 8px; }
-    .joueur-nom { font-weight: 500; color: #222; }
-    .joueur-score { font-size: 0.85rem; color: #666; }
-    .reponse-ok { color: #27ae60; font-weight: 600; }
-    .reponse-non { color: #c0392b; }
+    /* ── En jeu (race) ── */
+    .race-entete { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .timer-race { font-size: 2.5rem; font-weight: 700; color: #111; font-variant-numeric: tabular-nums; }
+    .timer-race.urgence { color: #c0392b; }
+    .timer-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
 
-    /* ── Écran 5 : Résultats ── */
-    #ecran-resultats { max-width: 500px; }
+    .scoreboard { display: flex; flex-direction: column; gap: 0.5rem; }
+    .joueur-ligne { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 10px; transition: background 0.2s; }
+    .joueur-pos { font-size: 1.1rem; width: 1.75rem; flex-shrink: 0; }
+    .joueur-nom { flex: 1; font-weight: 600; color: #222; font-size: 0.95rem; }
+    .joueur-niv { font-size: 0.72rem; background: #e8e8e8; color: #777; border-radius: 10px; padding: 0.15rem 0.55rem; font-weight: 600; flex-shrink: 0; }
+    .joueur-nb  { font-size: 0.78rem; color: #bbb; flex-shrink: 0; min-width: 4rem; text-align: right; }
+    .joueur-score-val { font-weight: 700; color: #111; font-size: 0.95rem; min-width: 5rem; text-align: right; }
+    .derniere-rep { font-size: 0.85rem; flex-shrink: 0; }
+
+    /* ── Résultats ── */
     .podium { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
     .podium-place { text-align: center; }
     .podium-barre { border-radius: 6px 6px 0 0; width: 90px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.5rem; font-size: 1.5rem; }
-    .podium-barre.p1 { height: 120px; background: #f1c40f; }
-    .podium-barre.p2 { height: 85px; background: #bdc3c7; }
-    .podium-barre.p3 { height: 60px; background: #cd7f32; }
+    .p1 { height: 120px; background: #f1c40f; }
+    .p2 { height: 85px; background: #bdc3c7; }
+    .p3 { height: 60px; background: #cd7f32; }
     .podium-nom { font-size: 0.85rem; font-weight: 600; margin-top: 0.4rem; color: #333; }
-    .podium-score { font-size: 0.78rem; color: #777; }
+    .podium-score { font-size: 0.75rem; color: #888; }
+    .table-resultats { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .table-resultats th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #aaa; font-weight: 600; padding: 0.5rem 0.75rem; text-align: left; }
+    .table-resultats td { padding: 0.6rem 0.75rem; border-top: 1px solid #f0f0f0; font-size: 0.88rem; }
   </style>
 </head>
 <body>
 
-  <!-- ÉCRAN 1 : Choix du jeu -->
-  <div id="ecran-jeux">
-    <h1>Choisir un jeu</h1>
-    <p class="sous-titre">Sélectionne le type de jeu pour commencer une session.</p>
-    <div class="grille-jeux">
-      <div class="carte-jeu" onclick="choisirJeu('quiz')">
-        <div class="icone">🧠</div>
-        <div class="nom-jeu">Quiz vocabulaire</div>
-        <div class="desc-jeu">Traduis les mots du texte — 4 choix de réponses, score selon la vitesse.</div>
+  <!-- ÉCRAN 1 : Accueil -->
+  <div id="ecran-accueil">
+    <h1>Alex.ex — Quiz adaptatif</h1>
+    <p class="sous-titre">Chaque apprenant progresse à son rythme.</p>
+    <div class="section">
+      <button class="btn btn-principal" onclick="allerConfig()">Nouvelle partie →</button>
+      <div style="margin-top:1.25rem" id="section-connectes" style="display:none">
+        <p class="connectes-titre">Apprenants connectés</p>
+        <div class="connectes-liste" id="connectes-liste"></div>
       </div>
-      <div class="carte-jeu bientot">
-        <div class="badge-bientot">Bientôt</div>
-        <div class="icone">🔤</div>
-        <div class="nom-jeu">Épellation</div>
-        <div class="desc-jeu">Écoute et écris le mot correctement.</div>
-      </div>
-      <div class="carte-jeu bientot">
-        <div class="badge-bientot">Bientôt</div>
-        <div class="icone">🃏</div>
-        <div class="nom-jeu">Mémoire</div>
-        <div class="desc-jeu">Associe les mots français à leur traduction.</div>
-      </div>
-    </div>
-    <div id="section-connectes" style="display:none">
-      <p class="connectes-titre">Apprenants connectés</p>
-      <div class="connectes-liste" id="connectes-liste"></div>
     </div>
   </div>
 
-  <!-- ÉCRAN 2 : Configuration -->
+  <!-- ÉCRAN 2 : Config -->
   <div id="ecran-config" style="display:none">
-    <button class="retour" onclick="retourJeux()">← Retour</button>
+    <button class="retour" onclick="afficher('ecran-accueil')">← Retour</button>
     <div class="section">
-      <h1 id="titre-config">Quiz vocabulaire</h1>
-      <p class="sous-titre">Configure la session avant de la créer.</p>
+      <h1>Configuration</h1>
+      <p class="sous-titre" style="margin-bottom:1.25rem">Choisis le dictionnaire et la durée.</p>
       <div class="rangee">
         <div class="champ">
-          <label>Questions</label>
-          <select id="nbQuestions">
-            <option value="5">5</option>
-            <option value="10" selected>10</option>
-            <option value="15">15</option>
-            <option value="20">20</option>
+          <label class="champ-label">Dictionnaire</label>
+          <select class="champ-select" id="source">
+            <option value="">Chargement…</option>
+          </select>
+        </div>
+        <div class="champ">
+          <label class="champ-label">Durée</label>
+          <select class="champ-select" id="dureeMinutes">
+            <option value="3">3 minutes</option>
+            <option value="5" selected>5 minutes</option>
+            <option value="10">10 minutes</option>
+            <option value="15">15 minutes</option>
+          </select>
+        </div>
+        <div class="champ">
+          <label class="champ-label">Niveau de départ</label>
+          <select class="champ-select" id="niveauDepart">
+            <option value="2">2 — Facile</option>
+            <option value="3" selected>3 — Intermédiaire</option>
+            <option value="5">5 — Avancé</option>
           </select>
         </div>
       </div>
@@ -153,9 +142,9 @@
       <div class="lobby-entete">
         <div>
           <h1>En attente des apprenants</h1>
-          <p class="sous-titre" style="margin-bottom:0">Partage le lien — lance quand tout le monde est prêt.</p>
+          <p class="sous-titre" style="margin-bottom:0">Partage le lien — lance quand tout le monde est là.</p>
         </div>
-        <div class="compteur"><span id="nb-connectes">0</span> / <span id="nb-total">0</span> connectés</div>
+        <div class="compteur"><strong id="nb-connectes">0</strong> / <strong id="nb-total">0</strong> connectés</div>
       </div>
       <div class="lien-bloc" id="lien-bloc" style="display:none">
         <span class="lien-label">Lien apprenants</span>
@@ -165,20 +154,25 @@
       <div class="cartes-joueurs" id="cartes-joueurs"></div>
       <div class="lancer-rangee">
         <button class="btn btn-principal" id="btn-lancer" onclick="lancerJeu()" disabled>Lancer la partie</button>
-        <span class="msg-attente" id="msg-attente">En attente de tous les apprenants…</span>
+        <span class="msg-attente" id="msg-attente">En attente des apprenants…</span>
       </div>
     </div>
   </div>
 
-  <!-- ÉCRAN 4 : En jeu -->
+  <!-- ÉCRAN 4 : En jeu (race) -->
   <div id="ecran-jeu" style="display:none">
     <div class="section">
-      <div class="timer" id="timer">—</div>
-      <div class="question-box" id="question-courante"></div>
-    </div>
-    <div class="section">
-      <h1 style="margin-bottom:1rem">Apprenants</h1>
-      <div class="joueurs-jeu" id="joueurs-jeu"></div>
+      <div class="race-entete">
+        <div>
+          <div class="timer-label">Temps restant</div>
+          <div class="timer-race" id="timer-race">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="timer-label">Questions répondues</div>
+          <div style="font-size:1.5rem;font-weight:700" id="total-reponses">0</div>
+        </div>
+      </div>
+      <div class="scoreboard" id="scoreboard"></div>
     </div>
   </div>
 
@@ -187,201 +181,194 @@
     <div class="section">
       <h1>Résultats</h1>
       <div class="podium" id="podium"></div>
-      <div id="stats-detaillees"></div>
-      <button class="btn btn-secondaire" style="margin-top:1.5rem" onclick="retourJeux()">Nouvelle partie</button>
+      <table class="table-resultats">
+        <thead><tr><th>#</th><th>Joueur</th><th>Niveau atteint</th><th>Questions</th><th>Score</th></tr></thead>
+        <tbody id="table-corps"></tbody>
+      </table>
+      <button class="btn btn-secondaire" style="margin-top:1.5rem" onclick="afficher('ecran-accueil')">Nouvelle partie</button>
     </div>
   </div>
 
-  <script>
-    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${proto}://${window.location.host}`);
+<script>
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
+  const ws    = new WebSocket(`${proto}://${window.location.host}`)
 
-    let apprenants = [];
-    let typeJeuChoisi = null;
-    let joueursDashboard = {};
-    let apprenantsPrets = {}; // id → { nomJeu, nomReel }
+  let apprenants     = []
+  let joueursDash    = {}     // id → { nomReel, nomJeu, connecte, score, niveau, nbReponses, derniereRep }
+  let apprenantsPrets = {}
+  let configSession  = {}
 
-    ws.onopen = () => ws.send(JSON.stringify({ evenement: 'teacher_connecte' }));
+  ws.onopen = () => ws.send(JSON.stringify({ evenement: 'teacher_connecte' }))
 
-    ws.onmessage = (e) => {
-      const { evenement, donnees } = JSON.parse(e.data);
+  ws.onmessage = (e) => {
+    const { evenement, donnees } = JSON.parse(e.data)
 
-      if (evenement === 'apprenants_disponibles') {
-        apprenants = donnees.apprenants;
+    if (evenement === 'apprenants_disponibles') {
+      apprenants = donnees.apprenants
+    }
+
+    if (evenement === 'apprenant_pret') {
+      apprenantsPrets[donnees.id] = { nomJeu: donnees.nomJeu, nomReel: donnees.nomReel }
+      majConnectesAccueil()
+    }
+
+    if (evenement === 'session_creee') {
+      joueursDash = {}
+      donnees.joueurs.forEach(j => {
+        joueursDash[j.id] = { ...j, nomJeu: null, connecte: false, score: 0, niveau: configSession.niveauDepart || 3, nbReponses: 0, derniereRep: null }
+      })
+      afficher('ecran-lobby')
+      document.getElementById('nb-total').textContent = donnees.joueurs.length
+      majCartes()
+      fetch('/api/infos').then(r => r.json()).then(({ url }) => {
+        document.getElementById('lien-url').textContent = url
+        document.getElementById('lien-bloc').style.display = 'flex'
+      }).catch(() => {
+        document.getElementById('lien-url').textContent = window.location.origin
+        document.getElementById('lien-bloc').style.display = 'flex'
+      })
+    }
+
+    if (evenement === 'joueur_connecte') {
+      if (joueursDash[donnees.id]) {
+        joueursDash[donnees.id].nomJeu  = donnees.nomJeu
+        joueursDash[donnees.id].connecte = true
       }
+      majCartes()
+      document.getElementById('nb-connectes').textContent = Object.values(joueursDash).filter(j => j.connecte).length
+    }
 
-      if (evenement === 'apprenant_pret') {
-        apprenantsPrets[donnees.id] = { nomJeu: donnees.nomJeu, nomReel: donnees.nomReel };
-        majConnectesAccueil();
+    if (evenement === 'tous_connectes') {
+      document.getElementById('btn-lancer').disabled = false
+      const msg = document.getElementById('msg-attente')
+      msg.textContent = 'Tout le monde est là — tu peux lancer !'
+      msg.classList.add('pret')
+    }
+
+    if (evenement === 'timer') {
+      majTimerRace(donnees.secondes)
+    }
+
+    if (evenement === 'reponse_recue') {
+      const j = Object.values(joueursDash).find(j => j.nomJeu === donnees.nomJeu)
+      if (j) {
+        j.score      = donnees.score
+        j.niveau     = donnees.niveau
+        j.nbReponses = donnees.nbReponses
+        j.derniereRep = donnees.correcte
       }
-
-      if (evenement === 'session_creee') {
-        joueursDashboard = {};
-        donnees.joueurs.forEach(j => {
-          joueursDashboard[j.id] = { ...j, nomJeu: null, connecte: false, repondu: false, correcte: null, score: 0 };
-        });
-        afficherLobby();
-        fetch('/api/infos').then(r => r.json()).then(({ url }) => {
-          document.getElementById('lien-url').textContent = url;
-          document.getElementById('lien-bloc').style.display = 'flex';
-        }).catch(() => {
-          document.getElementById('lien-url').textContent = window.location.origin;
-          document.getElementById('lien-bloc').style.display = 'flex';
-        });
-      }
-
-      if (evenement === 'joueur_connecte') {
-        if (joueursDashboard[donnees.id]) {
-          joueursDashboard[donnees.id].nomJeu = donnees.nomJeu;
-          joueursDashboard[donnees.id].connecte = true;
-        }
-        majCartes();
-        majCompteur();
-      }
-
-      if (evenement === 'tous_connectes') {
-        document.getElementById('btn-lancer').disabled = false;
-        const msg = document.getElementById('msg-attente');
-        msg.textContent = 'Tout le monde est là — tu peux lancer !';
-        msg.classList.add('pret');
-      }
-
-      if (evenement === 'question') {
-        afficherQuestion(donnees);
-        reinitReponses();
-      }
-
-      if (evenement === 'timer') {
-        document.getElementById('timer').textContent = donnees.secondes;
-      }
-
-      if (evenement === 'reponse_recue') {
-        const joueur = Object.values(joueursDashboard).find(j => j.nomJeu === donnees.nomJeu);
-        if (joueur) {
-          joueur.repondu = true;
-          joueur.correcte = donnees.correcte;
-          if (donnees.score !== undefined) joueur.score = donnees.score;
-        }
-        majJoueursDashboard();
-      }
-
-      if (evenement === 'partie_terminee') {
-        afficherResultats(donnees.classement);
-      }
-    };
-
-    function choisirJeu(type) {
-      typeJeuChoisi = type;
-      afficher('ecran-config');
+      majScoreboard()
+      const total = Object.values(joueursDash).reduce((s, j) => s + j.nbReponses, 0)
+      document.getElementById('total-reponses').textContent = total
     }
 
-    function retourJeux() {
-      apprenantsPrets = {};
-      joueursDashboard = {};
-      majConnectesAccueil();
-      afficher('ecran-jeux');
+    if (evenement === 'partie_terminee') {
+      afficherResultats(donnees.classement)
     }
+  }
 
-    function majConnectesAccueil() {
-      const section = document.getElementById('section-connectes');
-      const liste = document.getElementById('connectes-liste');
-      if (!section || !liste) return;
-      const prets = Object.values(apprenantsPrets);
-      section.style.display = prets.length > 0 ? 'block' : 'none';
-      liste.innerHTML = prets.map(p =>
-        `<span class="tag-connecte"><span class="pulse-dot"></span>${p.nomJeu} <span style="font-weight:400;color:#5dade2;font-size:0.78rem">(${p.nomReel})</span></span>`
-      ).join('');
-    }
+  function allerConfig() {
+    fetch('/api/dictionnaires').then(r => r.json()).then(dicos => {
+      const sel = document.getElementById('source')
+      sel.innerHTML = dicos.map(d => `<option value="${d.nom}">${d.nom.replace(/_/g, ' ')} (${d.entrees} mots)</option>`).join('')
+    }).catch(() => {})
+    afficher('ecran-config')
+  }
 
-    function creerSession() {
-      const nbQuestions = parseInt(document.getElementById('nbQuestions').value);
-      sessionStorage.setItem('nbQuestions', nbQuestions);
-      ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: apprenants.map(a => a.id), typeJeu: typeJeuChoisi } }));
-    }
+  function creerSession() {
+    const source       = document.getElementById('source').value
+    const dureeMinutes = parseInt(document.getElementById('dureeMinutes').value)
+    const niveauDepart = parseInt(document.getElementById('niveauDepart').value)
+    configSession = { source, dureeMinutes, niveauDepart }
+    apprenantsPrets = {}
+    ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: apprenants.map(a => a.id), typeJeu: 'quiz', niveauDepart } }))
+  }
 
-    function afficherLobby() {
-      afficher('ecran-lobby');
-      document.getElementById('nb-total').textContent = Object.keys(joueursDashboard).length;
-      majCartes();
-      majCompteur();
-    }
+  function lancerJeu() {
+    afficher('ecran-jeu')
+    ws.send(JSON.stringify({
+      evenement: 'lancer_jeu',
+      donnees: { source: configSession.source, dureeMinutes: configSession.dureeMinutes }
+    }))
+  }
 
-    function majCartes() {
-      document.getElementById('cartes-joueurs').innerHTML = Object.values(joueursDashboard).map(j => `
-        <div class="carte-joueur ${j.connecte ? 'connecte' : ''}">
-          <div class="nom-reel">${j.nomReel}</div>
-          <div class="statut-ligne">
-            <div class="dot"></div>
-            ${j.connecte
-              ? `<span class="nom-jeu-badge">${j.nomJeu}</span>`
-              : `<span class="statut-texte">En attente…</span>`}
-          </div>
-        </div>`).join('');
-    }
+  function majConnectesAccueil() {
+    const section = document.getElementById('section-connectes')
+    const liste   = document.getElementById('connectes-liste')
+    const prets   = Object.values(apprenantsPrets)
+    section.style.display = prets.length > 0 ? 'block' : 'none'
+    liste.innerHTML = prets.map(p =>
+      `<span class="tag-connecte"><span class="pulse-dot"></span>${p.nomJeu}</span>`
+    ).join('')
+  }
 
-    function majCompteur() {
-      document.getElementById('nb-connectes').textContent =
-        Object.values(joueursDashboard).filter(j => j.connecte).length;
-    }
+  function majCartes() {
+    document.getElementById('cartes-joueurs').innerHTML = Object.values(joueursDash).map(j => `
+      <div class="carte-joueur ${j.connecte ? 'connecte' : ''}">
+        <div class="nom-reel">${j.nomReel}</div>
+        <div class="statut-ligne">
+          <div class="dot"></div>
+          ${j.connecte ? `<span class="nom-jeu-badge">${j.nomJeu}</span>` : `<span class="statut-texte">En attente…</span>`}
+        </div>
+      </div>`).join('')
+  }
 
-    function lancerJeu() {
-      const nbQuestions = parseInt(sessionStorage.getItem('nbQuestions') || '10');
-      ws.send(JSON.stringify({ evenement: 'lancer_jeu', donnees: { nbQuestions } }));
-      afficher('ecran-jeu');
-    }
+  function majTimerRace(secondes) {
+    const min = Math.floor(secondes / 60)
+    const sec = secondes % 60
+    const el  = document.getElementById('timer-race')
+    el.textContent = `${min}:${sec.toString().padStart(2, '0')}`
+    el.className = 'timer-race' + (secondes <= 30 ? ' urgence' : '')
+  }
 
-    function copierLien() {
-      const url = document.getElementById('lien-url').textContent;
-      navigator.clipboard.writeText(url).then(() => {
-        const btn = document.getElementById('btn-copier');
-        btn.textContent = 'Copié !'; btn.classList.add('copie');
-        setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copie'); }, 2000);
-      });
-    }
+  function majScoreboard() {
+    const tries = [...Object.values(joueursDash)].sort((a, b) => b.score - a.score)
+    const medailles = ['🥇', '🥈', '🥉']
+    document.getElementById('scoreboard').innerHTML = tries.map((j, i) => `
+      <div class="joueur-ligne">
+        <span class="joueur-pos">${medailles[i] || (i + 1) + '.'}</span>
+        <span class="joueur-nom">${j.nomJeu || j.nomReel}</span>
+        <span class="joueur-niv">Niv.${j.niveau}</span>
+        <span class="joueur-nb">${j.nbReponses} rép.</span>
+        <span class="derniere-rep">${j.derniereRep === true ? '✓' : j.derniereRep === false ? '✗' : ''}</span>
+        <span class="joueur-score-val">${j.score.toLocaleString()} pts</span>
+      </div>`).join('')
+  }
 
-    function afficherQuestion(q) {
-      afficher('ecran-jeu');
-      const infos = [q.info.classe, q.info.genre !== 'non applicable' ? q.info.genre : null].filter(Boolean).join(' · ');
-      document.getElementById('question-courante').innerHTML = `
-        <div class="question-mot">${q.mot}</div>
-        <div class="question-info">${infos}</div>
-        <div class="question-info" style="font-style:italic;margin-top:0.2rem">${q.info.syntaxe || ''}</div>`;
-      majJoueursDashboard();
-    }
+  function afficherResultats(classement) {
+    afficher('ecran-resultats')
+    const ordre = [classement[1], classement[0], classement[2]].filter(Boolean)
+    const classes = ['p2', 'p1', 'p3']
+    const med = ['🥈', '🥇', '🥉']
+    document.getElementById('podium').innerHTML = ordre.map((j, i) => `
+      <div class="podium-place">
+        <div class="podium-barre ${classes[i]}">${med[i]}</div>
+        <div class="podium-nom">${j.nomJeu}</div>
+        <div class="podium-score">${j.score.toLocaleString()} pts</div>
+      </div>`).join('')
+    document.getElementById('table-corps').innerHTML = classement.map(j => `
+      <tr>
+        <td>${j.position}</td>
+        <td>${j.nomJeu}</td>
+        <td>Niveau ${j.niveau}</td>
+        <td>${j.nbReponses}</td>
+        <td><strong>${j.score.toLocaleString()} pts</strong></td>
+      </tr>`).join('')
+  }
 
-    function reinitReponses() {
-      Object.values(joueursDashboard).forEach(j => { j.repondu = false; j.correcte = null; });
-      majJoueursDashboard();
-    }
+  function copierLien() {
+    const url = document.getElementById('lien-url').textContent
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('btn-copier')
+      btn.textContent = 'Copié !'; btn.classList.add('copie')
+      setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copie') }, 2000)
+    })
+  }
 
-    function majJoueursDashboard() {
-      document.getElementById('joueurs-jeu').innerHTML = Object.values(joueursDashboard).map(j => `
-        <div class="joueur-ligne">
-          <span class="joueur-nom">${j.nomJeu || j.nomReel}</span>
-          <span class="${j.repondu ? (j.correcte ? 'reponse-ok' : 'reponse-non') : ''}">
-            ${j.repondu ? (j.correcte ? '✓ Correct' : '✗ Raté') : '…'}
-          </span>
-          <span class="joueur-score">${j.score || 0} pts</span>
-        </div>`).join('');
-    }
-
-    function afficherResultats(classement) {
-      afficher('ecran-resultats');
-      const ordre = [classement[1], classement[0], classement[2]].filter(Boolean);
-      const classes = ['p2', 'p1', 'p3'];
-      const medailles = ['🥈', '🥇', '🥉'];
-      document.getElementById('podium').innerHTML = ordre.map((j, i) => `
-        <div class="podium-place">
-          <div class="podium-barre ${classes[i]}">${medailles[i]}</div>
-          <div class="podium-nom">${j.nomJeu}</div>
-          <div class="podium-score">${j.score} pts</div>
-        </div>`).join('');
-    }
-
-    const ecrans = ['ecran-jeux', 'ecran-config', 'ecran-lobby', 'ecran-jeu', 'ecran-resultats'];
-    function afficher(id) {
-      ecrans.forEach(e => document.getElementById(e).style.display = e === id ? 'block' : 'none');
-    }
-  </script>
+  const ecrans = ['ecran-accueil', 'ecran-config', 'ecran-lobby', 'ecran-jeu', 'ecran-resultats']
+  function afficher(id) {
+    ecrans.forEach(e => document.getElementById(e).style.display = e === id ? 'block' : 'none')
+  }
+</script>
 </body>
 </html>
