@@ -201,44 +201,67 @@ wss.on('connection', (ws) => {
         const j = sessionActive.joueurs.find(p => p.id === ws._joueurId)
         if (!j) break
 
-        const difficulte          = j.difficulteEnCours   || 1
-        const tempsSecondes       = j.tempsSecondesEnCours || 10
-        const { score, delta }    = session.enregistrerReponse(
+        const difficulte    = j.difficulteEnCours   || 1
+        const tempsSecondes = j.tempsSecondesEnCours || 10
+        const estBoss       = j.questionEstBoss || false
+        const niveauAvant   = Math.round(j.niveau)
+
+        const { score, delta, streak } = session.enregistrerReponse(
           sessionActive, j.id,
           donnees.questionIndex, donnees.optionChoisie,
           donnees.correcte, donnees.tempsMsReponse,
-          difficulte, tempsSecondes
+          difficulte, tempsSecondes, estBoss
         )
         session.ajusterNiveau(j, donnees.correcte, donnees.tempsMsReponse)
 
-        envoyer(ws, 'score_update', { score, delta, correcte: donnees.correcte })
+        const niveauApres = Math.round(j.niveau)
+        const levelUp     = niveauApres > niveauAvant
+
+        // Rang du joueur (par score décroissant)
+        const scores = sessionActive.joueurs.map(p => p.score).sort((a, b) => b - a)
+        const rang   = scores.indexOf(score) + 1
+
+        envoyer(ws, 'score_update', { score, delta, correcte: donnees.correcte, streak, rang, levelUp, niveau: niveauApres, estBoss })
+
+        // Si mauvaise réponse → sabotage : secoue les autres joueurs
+        if (!donnees.correcte) {
+          wsJoueurs.forEach((wsJ, idJ) => {
+            if (idJ !== j.id) envoyer(wsJ, 'perturber', { par: j.nomJeu || j.id })
+          })
+        }
 
         diffuserAuTeacher('reponse_recue', {
           nomJeu:     j.nomJeu,
           correcte:   donnees.correcte,
-          score:      score,
-          niveau:     Math.round(j.niveau),
+          score,
+          niveau:     niveauApres,
           nbReponses: j.reponses.length,
+          streak,
         })
 
         diffuserAuxObservateurs('reponse_recue', {
-          joueur:        j.nomJeu || j.id,
-          correcte:      donnees.correcte,
-          optionChoisie: donnees.optionChoisie,
+          joueur:         j.nomJeu || j.id,
+          correcte:       donnees.correcte,
+          optionChoisie:  donnees.optionChoisie,
           tempsMsReponse: donnees.tempsMsReponse,
           delta,
           score,
-          niveau:        Math.round(j.niveau),
-          nbReponses:    j.reponses.length,
-          question:      j.questionEnCours || null,
+          niveau:         niveauApres,
+          nbReponses:     j.reponses.length,
+          streak,
+          question:       j.questionEnCours || null,
         })
 
         // Question suivante immédiatement
+        const prochainIndex = j.reponses.length
+        const estProchainBoss = prochainIndex > 0 && prochainIndex % 10 === 0
         const q = generateur.genererPourJoueur(j, sessionActive.config.source)
         if (q) {
-          j.difficulteEnCours      = q.difficulte
-          j.tempsSecondesEnCours   = q.tempsSecondes
-          j.questionEnCours        = q
+          j.difficulteEnCours  = q.difficulte
+          j.tempsSecondesEnCours = q.tempsSecondes
+          j.questionEnCours    = q
+          j.questionEstBoss    = estProchainBoss
+          if (estProchainBoss) q.estBoss = true
           envoyer(ws, 'question', q)
           const payload2 = { joueur: j.nomJeu || j.id, question: q }
           diffuserAuxObservateurs('question_generee', payload2)

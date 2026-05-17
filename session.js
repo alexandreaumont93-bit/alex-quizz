@@ -26,6 +26,7 @@ function creerSession(slots, typeJeu = 'quiz', niveauDepart = 1, niveauxParJoueu
       questionsVues:       new Set(),
       reponses:            [],
       erreurConsecutives:  0,
+      streakActuel:        0,
     }
   })
   return { typeJeu, etat: 'attente', joueurs, config: null, creeLe: Date.now() }
@@ -71,18 +72,22 @@ function tousConnectes(session) {
 // vitesse relative au temps alloué pour la question :
 //   répondre en début de timer → vitesse proche de 1 → bonus max
 //   répondre en fin de timer   → vitesse proche de 0 → bonus nul
-function enregistrerReponse(session, id, questionIndex, optionChoisie, correcte, tempsMsReponse, difficulte = 1, tempsSecondes = 10) {
+function enregistrerReponse(session, id, questionIndex, optionChoisie, correcte, tempsMsReponse, difficulte = 1, tempsSecondes = 10, estBoss = false) {
   const joueur = session.joueurs.find(j => j.id === id)
-  if (!joueur) return { score: 0, delta: 0 }
+  if (!joueur) return { score: 0, delta: 0, streak: 0 }
   joueur.reponses.push({ questionIndex, optionChoisie, correcte, tempsMsReponse })
   const scoreBefore = joueur.score
   if (correcte) {
-    const vitesse = Math.max(0, 1 - tempsMsReponse / (tempsSecondes * 1000))
-    joueur.score += Math.round((100 + 200 * vitesse) * difficulte)
+    joueur.streakActuel++
+    const vitesse    = Math.max(0, 1 - tempsMsReponse / (tempsSecondes * 1000))
+    const streakMult = joueur.streakActuel >= 10 ? 3 : joueur.streakActuel >= 6 ? 2 : joueur.streakActuel >= 3 ? 1.5 : 1
+    const bossMult   = estBoss ? 3 : 1
+    joueur.score += Math.round((100 + 200 * vitesse) * difficulte * streakMult * bossMult)
   } else {
+    joueur.streakActuel = 0
     joueur.score = Math.max(0, joueur.score - Math.round(400 * difficulte))
   }
-  return { score: joueur.score, delta: joueur.score - scoreBefore }
+  return { score: joueur.score, delta: joueur.score - scoreBefore, streak: joueur.streakActuel }
 }
 
 function classement(session) {

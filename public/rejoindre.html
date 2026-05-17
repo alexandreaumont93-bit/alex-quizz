@@ -25,9 +25,8 @@
     .attente-entete { background: white; border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 2px 10px rgba(0,0,0,0.08); text-align: center; }
     .ton-nom { font-size: 1.8rem; font-weight: 700; color: #111; margin: 0.5rem 0; }
     .attente-sous { font-size: 0.85rem; color: #999; }
-    .pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #27ae60; margin-right: 0.4rem; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
-
+    .pulse { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #27ae60; margin-right: 0.4rem; animation: pulse-dot 1.5s infinite; }
+    @keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(0.8); } }
     .joueurs-attente { background: white; border-radius: 14px; padding: 1.25rem 1.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
     .joueurs-titre { font-size: 0.78rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
     .joueur-tag { display: inline-flex; align-items: center; gap: 0.4rem; background: #f0faf4; border: 1.5px solid #27ae60; color: #1e8449; border-radius: 20px; padding: 0.3rem 0.75rem; font-size: 0.88rem; font-weight: 600; margin: 0.25rem; }
@@ -35,15 +34,32 @@
 
     /* ── Jeu ── */
     #vue-jeu { width: 100%; max-width: 600px; display: flex; flex-direction: column; align-items: center; }
-    .entete { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .entete { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 0.5rem; flex-wrap: wrap; }
     .nom-jeu { font-weight: 600; color: #333; }
     .score { font-size: 0.9rem; color: #666; }
+    .rang-badge { font-size: 0.82rem; color: #888; background: #f5f5f5; border-radius: 20px; padding: 0.15rem 0.55rem; min-width: 2rem; text-align: center; }
+    .streak-badge { font-size: 0.85rem; font-weight: 700; color: #e67e22; background: #fef5e7; border: 1.5px solid #f39c12; border-radius: 20px; padding: 0.15rem 0.6rem; display: none; }
+    .streak-badge.visible { display: inline-block; }
+    @keyframes streak-pop { 0% { transform: scale(1); } 50% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
     .timer { font-size: 3rem; font-weight: 700; color: #111; margin-bottom: 1rem; text-align: center; }
     .timer.urgence { color: #c0392b; }
-    .carte-question { background: white; border-radius: 14px; padding: 1.5rem; width: 100%; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 1.5rem; text-align: center; }
+
+    .boss-banner { display: none; text-align: center; font-size: 1rem; font-weight: 700; color: #d35400; background: #fef5e7; border: 2px solid #f39c12; border-radius: 10px; padding: 0.5rem 1rem; margin-bottom: 0.75rem; width: 100%; }
+    .boss-banner.visible { display: block; }
+    @keyframes boss-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(243,156,18,0.5); } 50% { box-shadow: 0 0 0 10px rgba(243,156,18,0); } }
+
+    .carte-question { background: white; border-radius: 14px; padding: 1.5rem; width: 100%; margin-bottom: 1.5rem; text-align: center; border: 2px solid transparent; transition: border-color 0.3s; }
+    .carte-question.boss { border-color: #f39c12; background: #fffbf0; animation: boss-pulse 1.5s infinite; box-shadow: 0 2px 16px rgba(243,156,18,0.25); }
     .mot { font-size: 2.2rem; font-weight: 700; color: #111; }
     .info-gram { font-size: 0.85rem; color: #888; margin-top: 0.4rem; }
     .syntaxe { font-size: 0.9rem; color: #777; margin-top: 0.5rem; font-style: italic; }
+    /* Conjugaison : la phrase est le centre, l'infinitif + temps forment l'instruction */
+    .carte-question.conjugaison .mot { font-size: 1rem; font-weight: 400; color: #888; }
+    .carte-question.conjugaison .info-gram { display: inline-block; margin-top: 0.4rem; background: #eef4ff; color: #2471a3; border: 1.5px solid #aed6f1; border-radius: 8px; padding: 0.2rem 0.65rem; font-size: 0.92rem; font-weight: 700; letter-spacing: 0.03em; }
+    .carte-question.conjugaison .syntaxe { font-size: 1.2rem; font-weight: 500; font-style: normal; color: #111; margin-top: 1rem; line-height: 1.65; }
+    .trou { display: inline-block; min-width: 3.5em; border-bottom: 2.5px solid #222; vertical-align: bottom; }
+
     .options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; width: 100%; }
     .option { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1rem; font-size: 1rem; cursor: pointer; text-align: left; transition: border-color 0.15s; }
     .option:hover:not(:disabled) { border-color: #aaa; }
@@ -52,6 +68,16 @@
     .option.incorrect { border-color: #c0392b; background: #fdf2f2; color: #c0392b; }
     .lettre { font-weight: 700; margin-right: 0.5rem; color: #999; }
     .feedback { margin-top: 1rem; font-size: 1rem; font-weight: 500; color: #555; text-align: center; min-height: 1.5rem; }
+
+    /* ── Animations ── */
+    @keyframes flash-correct { 0%,100% { background: #f0f0f0; } 35% { background: #d5f5e3; } }
+    @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+    body.flash-correct { animation: flash-correct 0.55s ease; }
+    body.shake { animation: shake 0.5s ease; }
+
+    /* ── Toast level-up ── */
+    #toast-levelup { position: fixed; top: 44%; left: 50%; transform: translate(-50%, -50%) scale(0.85); background: linear-gradient(135deg, #1a252f, #2980b9); color: white; font-size: 1.5rem; font-weight: 700; padding: 1rem 2rem; border-radius: 16px; pointer-events: none; z-index: 999; opacity: 0; transition: opacity 0.25s, transform 0.25s; text-align: center; white-space: nowrap; }
+    #toast-levelup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
     /* ── Résultats ── */
     #vue-resultats { text-align: center; width: 100%; max-width: 600px; }
@@ -65,6 +91,8 @@
   </style>
 </head>
 <body>
+
+  <div id="toast-levelup"></div>
 
   <!-- FORMULAIRE -->
   <div id="vue-formulaire" class="carte">
@@ -102,10 +130,13 @@
   <div id="vue-jeu" style="display:none">
     <div class="entete">
       <span class="nom-jeu" id="nom-jeu-affiche">—</span>
+      <span class="streak-badge" id="streak-badge">🔥 0</span>
+      <span class="rang-badge" id="rang-badge"></span>
       <span class="score" id="score-affiche">0 pts</span>
     </div>
     <div class="timer" id="timer">—</div>
-    <div class="carte-question">
+    <div class="boss-banner" id="boss-banner">⚡ QUESTION BOSS — Points × 3 !</div>
+    <div class="carte-question" id="carte-question">
       <div class="mot" id="mot">—</div>
       <div class="info-gram" id="info-gram"></div>
       <div class="syntaxe" id="syntaxe"></div>
@@ -131,6 +162,62 @@
     let nomJeuLocal = '';
     let idApprenant = '';
 
+    // ── Audio ───────────────────────────────────────────────────────
+    let audioCtx = null;
+    function getAudio() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      return audioCtx;
+    }
+    function ton(freq, dur, type = 'sine', vol = 0.25, delai = 0) {
+      try {
+        const ctx = getAudio();
+        const osc = ctx.createOscillator();
+        const g   = ctx.createGain();
+        osc.connect(g); g.connect(ctx.destination);
+        osc.type = type; osc.frequency.value = freq;
+        const t = ctx.currentTime + delai;
+        g.gain.setValueAtTime(vol, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.start(t); osc.stop(t + dur);
+      } catch(e) {}
+    }
+    function sonCorrect()   { ton(523, 0.1, 'sine', 0.3); ton(784, 0.18, 'sine', 0.3, 0.09); }
+    function sonErreur()    { ton(200, 0.35, 'sawtooth', 0.2); }
+    function sonLevelUp()   { [400, 500, 630, 800].forEach((f, i) => ton(f, 0.15, 'sine', 0.25, i * 0.1)); }
+    function sonStreak(s)   { const f = s >= 10 ? 900 : s >= 6 ? 700 : 560; ton(f, 0.1, 'sine', 0.25); ton(f * 1.25, 0.18, 'sine', 0.25, 0.09); }
+    function sonBoss()      { ton(150, 0.5, 'sawtooth', 0.12); ton(300, 0.4, 'square', 0.1, 0.45); }
+    function sonPerturber() { ton(80, 0.4, 'sawtooth', 0.15); }
+
+    // ── Animation helpers ──────────────────────────────────────────
+    function animBody(cls) {
+      document.body.classList.remove(cls);
+      void document.body.offsetWidth;
+      document.body.classList.add(cls);
+      setTimeout(() => document.body.classList.remove(cls), 650);
+    }
+
+    function toastLevelUp(niveau) {
+      const el = document.getElementById('toast-levelup');
+      el.textContent = `⬆️ Niveau ${niveau} !`;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 1800);
+    }
+
+    function majStreak(streak) {
+      const el = document.getElementById('streak-badge');
+      if (streak >= 3) {
+        const emoji = streak >= 10 ? '🌟' : streak >= 6 ? '💥' : '🔥';
+        el.textContent = `${emoji} ×${streak}`;
+        el.classList.add('visible');
+        el.style.animation = 'none';
+        void el.offsetWidth;
+        el.style.animation = 'streak-pop 0.3s ease';
+      } else {
+        el.classList.remove('visible');
+      }
+    }
+
+    // ── WebSocket ──────────────────────────────────────────────────
     ws.onopen = () => {
       const savedId  = localStorage.getItem('quiz_id');
       const savedNom = localStorage.getItem('quiz_nomJeu');
@@ -192,6 +279,30 @@
         afficherQuestion(donnees);
       }
 
+      if (evenement === 'score_update') {
+        score = donnees.score;
+        document.getElementById('score-affiche').textContent = score + ' pts';
+        majStreak(donnees.streak || 0);
+        if (donnees.rang) {
+          const rangTxt = donnees.rang === 1 ? '🥇' : donnees.rang === 2 ? '🥈' : donnees.rang === 3 ? '🥉' : `#${donnees.rang}`;
+          document.getElementById('rang-badge').textContent = rangTxt;
+        }
+        if (donnees.levelUp) {
+          toastLevelUp(donnees.niveau);
+          sonLevelUp();
+        }
+        const streak = donnees.streak || 0;
+        if (donnees.correcte && streak >= 6) sonStreak(streak);
+      }
+
+      if (evenement === 'perturber') {
+        animBody('shake');
+        sonPerturber();
+        const fb = document.getElementById('feedback');
+        fb.textContent = `💨 Perturbé par ${donnees.par} !`;
+        setTimeout(() => { if (fb.textContent.startsWith('💨')) fb.textContent = ''; }, 1500);
+      }
+
       if (evenement === 'timer') {
         const el = document.getElementById('timer');
         el.textContent = donnees.secondes;
@@ -207,6 +318,7 @@
       }
     };
 
+    // ── UI ─────────────────────────────────────────────────────────
     function continuer() {
       const id = document.getElementById('nomReel').value;
       if (!id) { document.getElementById('erreur').textContent = 'Choisis ton nom.'; return; }
@@ -235,15 +347,37 @@
       questionActuelle = donnees;
       aRepondu = false;
       afficher('vue-jeu');
-      const infos = [donnees.info.classe, donnees.info.genre !== 'non applicable' ? donnees.info.genre : null].filter(Boolean).join(' · ');
-      document.getElementById('mot').textContent = donnees.mot;
-      document.getElementById('info-gram').textContent = infos;
-      const syntaxeBrute = donnees.info.syntaxe || '';
-      const motEscaped = donnees.mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      document.getElementById('syntaxe').innerHTML = syntaxeBrute.replace(
-        new RegExp('(' + motEscaped + ')', 'i'), '<strong>$1</strong>'
-      );
+      const carteEl = document.getElementById('carte-question');
+      const bossEl  = document.getElementById('boss-banner');
+      if (donnees.estBoss) {
+        carteEl.classList.add('boss');
+        bossEl.classList.add('visible');
+        sonBoss();
+      } else {
+        carteEl.classList.remove('boss');
+        bossEl.classList.remove('visible');
+      }
       document.getElementById('feedback').textContent = '';
+
+      if (donnees.type === 'conjugaison') {
+        carteEl.classList.add('conjugaison');
+        // Phrase comme élément principal, infinitif + temps comme sous-titre
+        const phrase = (donnees.info.syntaxe || '').replace('___', '<span class="trou">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
+        document.getElementById('mot').textContent = donnees.mot;
+        document.getElementById('info-gram').textContent = donnees.info.note || '';
+        document.getElementById('syntaxe').innerHTML = phrase;
+      } else {
+        carteEl.classList.remove('conjugaison');
+        const infos = [donnees.info.classe, donnees.info.genre !== 'non applicable' ? donnees.info.genre : null].filter(Boolean).join(' · ');
+        document.getElementById('mot').textContent = donnees.mot;
+        document.getElementById('info-gram').textContent = infos;
+        const syntaxeBrute = donnees.info.syntaxe || '';
+        const motEscaped = donnees.mot.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        document.getElementById('syntaxe').innerHTML = syntaxeBrute.replace(
+          new RegExp('(' + motEscaped + ')', 'i'), '<strong>$1</strong>'
+        );
+      }
+
       document.getElementById('options').innerHTML = donnees.options.map((opt, i) =>
         `<button class="option" onclick="repondre(${i})" id="opt-${i}"><span class="lettre">${LETTRES[i]}</span>${opt.texte}</button>`
       ).join('');
@@ -252,16 +386,17 @@
     function repondre(index) {
       if (aRepondu || !questionActuelle) return;
       aRepondu = true;
-      const tempsMs = questionActuelle.tempsDebut ? Date.now() - questionActuelle.tempsDebut : 0;
+      const tempsMs  = questionActuelle.tempsDebut ? Date.now() - questionActuelle.tempsDebut : 0;
       const correcte = questionActuelle.options[index].correcte;
       document.querySelectorAll('.option').forEach(b => b.disabled = true);
       document.getElementById(`opt-${index}`).classList.add(correcte ? 'correct' : 'incorrect');
       if (correcte) {
-        const bonus = Math.round(500 + 500 * Math.max(0, 1 - tempsMs / 15000));
-        score += bonus;
-        document.getElementById('score-affiche').textContent = score + ' pts';
+        animBody('flash-correct');
+        sonCorrect();
         document.getElementById('feedback').textContent = '✓ Bonne réponse !';
       } else {
+        animBody('shake');
+        sonErreur();
         document.getElementById('feedback').textContent = '✗ Mauvaise réponse.';
       }
       ws.send(JSON.stringify({ evenement: 'repondre', donnees: { questionIndex: questionActuelle.index, optionChoisie: index, correcte, tempsMsReponse: tempsMs } }));

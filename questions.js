@@ -186,6 +186,8 @@ function genererUne({ entrees, toutes, type, nb_choix, qualite, source, exclure 
         thème:       entree.thème       || '',
         syntaxe:     entree.exemple     || '',
         classe:      entree.nature      || '',
+        note:        entree.note        || '',
+        définition:  entree.définition  || '',
       },
     }
   }
