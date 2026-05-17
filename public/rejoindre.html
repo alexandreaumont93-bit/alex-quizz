@@ -411,7 +411,9 @@
 
     function afficherResultats(classement) {
       afficher('vue-resultats');
-      document.getElementById('score-final').textContent = score + ' pts';
+      const moi = classement.find(j => j.nomJeu === nomJeuLocal);
+      const scoreFinal = moi ? moi.score : score;
+      document.getElementById('score-final').textContent = scoreFinal + ' pts';
       const medailles = ['🥇', '🥈', '🥉'];
       document.getElementById('classement').innerHTML = classement.map((j, i) =>
         `<div class="ligne-classement"><span>${medailles[i] || (i+1)+'.'}</span><span class="nom-classement">${j.nomJeu}</span><span class="score-classement">${j.score} pts</span></div>`
