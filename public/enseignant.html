@@ -29,6 +29,14 @@
     .carte-jeu .desc-jeu { font-size: 0.82rem; color: #777; line-height: 1.4; }
     .badge-bientot { position: absolute; top: 0.75rem; right: 0.75rem; background: #f0f0f0; color: #999; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
 
+    /* ── Apprenants connectés (accueil) ── */
+    #section-connectes { margin-top: 1.5rem; }
+    .connectes-titre { font-size: 0.78rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+    .connectes-liste { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tag-connecte { display: inline-flex; align-items: center; gap: 0.45rem; background: #f0faf4; border: 1.5px solid #27ae60; color: #1e8449; border-radius: 20px; padding: 0.3rem 0.8rem; font-size: 0.88rem; font-weight: 600; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; animation: pulseVert 1.5s infinite; flex-shrink: 0; }
+    @keyframes pulseVert { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+
     /* ── Écran 2 : Config ── */
     #ecran-config { max-width: 600px; }
     .retour { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #888; cursor: pointer; margin-bottom: 1.25rem; background: none; border: none; padding: 0; }
@@ -120,6 +128,10 @@
         <div class="nom-jeu">Mémoire</div>
         <div class="desc-jeu">Associe les mots français à leur traduction.</div>
       </div>
+    </div>
+    <div id="section-connectes" style="display:none">
+      <p class="connectes-titre">Apprenants connectés</p>
+      <div class="connectes-liste" id="connectes-liste"></div>
     </div>
   </div>
 
@@ -214,6 +226,7 @@
       if (evenement === 'apprenant_pret') {
         apprenantsPrets[donnees.id] = { nomJeu: donnees.nomJeu, nomReel: donnees.nomReel };
         majIndicateurPret(donnees.id);
+        majConnectesAccueil();
       }
 
       if (evenement === 'session_creee') {
@@ -281,6 +294,7 @@
       apprenantsPrets = {};
       joueursDashboard = {};
       construireGrilleApprenants();
+      majConnectesAccueil();
       afficher('ecran-jeux');
     }
 
@@ -300,6 +314,17 @@
         </div>`;
       }).join('');
       document.getElementById('btn-creer').disabled = true;
+    }
+
+    function majConnectesAccueil() {
+      const section = document.getElementById('section-connectes');
+      const liste = document.getElementById('connectes-liste');
+      if (!section || !liste) return;
+      const prets = Object.values(apprenantsPrets);
+      section.style.display = prets.length > 0 ? 'block' : 'none';
+      liste.innerHTML = prets.map(p =>
+        `<span class="tag-connecte"><span class="pulse-dot"></span>${p.nomJeu} <span style="font-weight:400;color:#5dade2;font-size:0.78rem">(${p.nomReel})</span></span>`
+      ).join('');
     }
 
     function majIndicateurPret(id) {
