@@ -143,6 +143,14 @@
         document.getElementById('btn-continuer').disabled = false;
       }
 
+      if (evenement === 'en_attente_ok') {
+        nomJeuLocal = donnees.nomJeu;
+        document.getElementById('nom-jeu-affiche').textContent = donnees.nomJeu;
+        document.getElementById('affiche-nom-jeu').textContent = donnees.nomJeu;
+        majTagsJoueurs([]);
+        afficher('vue-attente');
+      }
+
       if (evenement === 'session_ok') {
         nomJeuLocal = donnees.nomJeu;
         document.getElementById('nom-jeu-affiche').textContent = donnees.nomJeu;

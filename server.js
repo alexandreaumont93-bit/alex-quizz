@@ -33,7 +33,6 @@ const serveur = http.createServer((req, res) => {
     res.end(JSON.stringify({ url: host }));
     return;
   }
-
   const fichier = req.url === '/' ? '/rejoindre.html' : req.url;
   const chemin  = path.join(PUBLIC_DIR, fichier);
   if (!fs.existsSync(chemin)) { res.writeHead(404); res.end('Non trouvé'); return; }
@@ -43,9 +42,10 @@ const serveur = http.createServer((req, res) => {
 
 const wss = new WebSocketServer({ server: serveur });
 
-let sessionActive = null;
-let wsTeacher     = null;
-const wsJoueurs   = new Map();
+let sessionActive    = null;
+let wsTeacher        = null;
+const wsJoueurs      = new Map(); // id → ws (joueurs dans la session)
+const joueursPrets   = new Map(); // id → { ws, nomJeu, nomReel } (connectés, pas encore en session)
 let questionCourante = null;
 
 function envoyer(ws, evenement, donnees = {}) {
@@ -58,6 +58,10 @@ function diffuserATous(evenement, donnees = {}) {
 function diffuserAuTeacher(evenement, donnees = {}) {
   envoyer(wsTeacher, evenement, donnees);
 }
+function lobbyJoueurs() {
+  if (!sessionActive) return [];
+  return sessionActive.joueurs.filter(j => j.connecte).map(j => ({ nomJeu: j.nomJeu }));
+}
 
 wss.on('connection', (ws) => {
   ws.on('message', (msg) => {
@@ -66,31 +70,70 @@ wss.on('connection', (ws) => {
     const { evenement, donnees = {} } = paquet;
 
     switch (evenement) {
+
       case 'teacher_connecte':
         wsTeacher = ws;
         envoyer(ws, 'apprenants_disponibles', { apprenants: session.chargerApprenants() });
+        // Envoyer les apprenants déjà connectés en attente
+        joueursPrets.forEach((j, id) => {
+          diffuserAuTeacher('apprenant_pret', { id, nomReel: j.nomReel, nomJeu: j.nomJeu });
+        });
         break;
 
       case 'demander_apprenants':
         envoyer(ws, 'apprenants_disponibles', { apprenants: session.chargerApprenants() });
         break;
 
-      case 'configurer_session':
+      case 'configurer_session': {
         sessionActive = session.creerSession(donnees.slots, donnees.typeJeu);
-        envoyer(ws, 'session_creee', { joueurs: sessionActive.joueurs.map(j => ({ id: j.id, nomReel: j.nomReel, connecte: false })) });
+        envoyer(ws, 'session_creee', {
+          joueurs: sessionActive.joueurs.map(j => ({ id: j.id, nomReel: j.nomReel, connecte: false }))
+        });
+        // Connecter automatiquement les apprenants déjà en salle d'attente
+        for (const joueur of sessionActive.joueurs) {
+          const pret = joueursPrets.get(joueur.id);
+          if (!pret) continue;
+          session.joueurRejoindre(sessionActive, joueur.id, joueur.id, pret.nomJeu);
+          wsJoueurs.set(joueur.id, pret.ws);
+          pret.ws._enSession = true;
+          envoyer(pret.ws, 'session_ok', { nomJeu: pret.nomJeu, joueurs: lobbyJoueurs() });
+          diffuserAuTeacher('joueur_connecte', { id: joueur.id, nomReel: joueur.nomReel, nomJeu: pret.nomJeu });
+        }
+        wsJoueurs.forEach(ws2 => envoyer(ws2, 'lobby_update', { joueurs: lobbyJoueurs() }));
+        if (session.tousConnectes(sessionActive)) diffuserAuTeacher('tous_connectes', {});
         break;
+      }
 
       case 'rejoindre': {
-        if (!sessionActive) { envoyer(ws, 'erreur', { message: 'Pas de session active — attends que l\'enseignant crée la partie.' }); break; }
-        const joueur = session.joueurRejoindre(sessionActive, donnees.id, donnees.id, donnees.nomJeu);
-        if (!joueur) { envoyer(ws, 'erreur', { message: 'Prénom non reconnu dans cette session.' }); break; }
+        const apprenants = session.chargerApprenants();
+        const apprenant  = apprenants.find(a => a.id === donnees.id);
+        if (!apprenant) { envoyer(ws, 'erreur', { message: 'Prénom non reconnu.' }); break; }
+
         ws._joueurId = donnees.id;
+        joueursPrets.set(donnees.id, { ws, nomJeu: donnees.nomJeu, nomReel: apprenant.nom });
+        diffuserAuTeacher('apprenant_pret', { id: donnees.id, nomReel: apprenant.nom, nomJeu: donnees.nomJeu });
+
+        // Pas de session → salle d'attente
+        if (!sessionActive) {
+          envoyer(ws, 'en_attente_ok', { nomJeu: donnees.nomJeu });
+          break;
+        }
+
+        // Session active → vérifier si cet apprenant est dedans
+        const joueur = sessionActive.joueurs.find(j => j.id === donnees.id);
+        if (!joueur) {
+          envoyer(ws, 'en_attente_ok', { nomJeu: donnees.nomJeu });
+          break;
+        }
+
+        // Dans la session → connexion normale
+        session.joueurRejoindre(sessionActive, donnees.id, donnees.id, donnees.nomJeu);
         wsJoueurs.set(donnees.id, ws);
-        const lobbyJoueurs = () => sessionActive.joueurs.filter(j => j.connecte).map(j => ({ nomJeu: j.nomJeu }));
-        envoyer(ws, 'session_ok', { nomJeu: joueur.nomJeu, nomReel: joueur.nomReel, joueurs: lobbyJoueurs() });
+        ws._enSession = true;
+        envoyer(ws, 'session_ok', { nomJeu: donnees.nomJeu, joueurs: lobbyJoueurs() });
         if (sessionActive.etat === 'en-cours' && questionCourante) envoyer(ws, 'question', questionCourante);
         wsJoueurs.forEach(ws2 => envoyer(ws2, 'lobby_update', { joueurs: lobbyJoueurs() }));
-        diffuserAuTeacher('joueur_connecte', { id: joueur.id, nomReel: joueur.nomReel, nomJeu: joueur.nomJeu });
+        diffuserAuTeacher('joueur_connecte', { id: joueur.id, nomReel: joueur.nomReel, nomJeu: donnees.nomJeu });
         if (session.tousConnectes(sessionActive)) diffuserAuTeacher('tous_connectes', {});
         break;
       }
@@ -119,11 +162,12 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     if (ws === wsTeacher) { wsTeacher = null; return; }
-    if (ws._joueurId) {
-      wsJoueurs.delete(ws._joueurId);
-      if (sessionActive) session.joueurDeconnecter(sessionActive, ws._joueurId);
-      diffuserAuTeacher('joueur_deconnecte', { id: ws._joueurId });
-    }
+    const id = ws._joueurId;
+    if (!id) return;
+    joueursPrets.delete(id);
+    wsJoueurs.delete(id);
+    if (sessionActive) session.joueurDeconnecter(sessionActive, id);
+    diffuserAuTeacher('joueur_deconnecte', { id });
   });
 });
 
