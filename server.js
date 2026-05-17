@@ -81,13 +81,15 @@ wss.on('connection', (ws) => {
         break;
 
       case 'rejoindre': {
-        if (!sessionActive) { envoyer(ws, 'erreur', { message: 'Pas de session active' }); break; }
+        if (!sessionActive) { envoyer(ws, 'erreur', { message: 'Pas de session active — attends que l\'enseignant crée la partie.' }); break; }
         const joueur = session.joueurRejoindre(sessionActive, donnees.id, donnees.id, donnees.nomJeu);
-        if (!joueur) { envoyer(ws, 'erreur', { message: 'Apprenant non reconnu' }); break; }
+        if (!joueur) { envoyer(ws, 'erreur', { message: 'Prénom non reconnu dans cette session.' }); break; }
         ws._joueurId = donnees.id;
         wsJoueurs.set(donnees.id, ws);
-        envoyer(ws, 'session_ok', { nomJeu: joueur.nomJeu, nomReel: joueur.nomReel });
+        const lobbyJoueurs = () => sessionActive.joueurs.filter(j => j.connecte).map(j => ({ nomJeu: j.nomJeu }));
+        envoyer(ws, 'session_ok', { nomJeu: joueur.nomJeu, nomReel: joueur.nomReel, joueurs: lobbyJoueurs() });
         if (sessionActive.etat === 'en-cours' && questionCourante) envoyer(ws, 'question', questionCourante);
+        wsJoueurs.forEach(ws2 => envoyer(ws2, 'lobby_update', { joueurs: lobbyJoueurs() }));
         diffuserAuTeacher('joueur_connecte', { id: joueur.id, nomReel: joueur.nomReel, nomJeu: joueur.nomJeu });
         if (session.tousConnectes(sessionActive)) diffuserAuTeacher('tous_connectes', {});
         break;
