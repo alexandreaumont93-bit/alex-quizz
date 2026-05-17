@@ -45,10 +45,18 @@ function genererConfig(niveau) {
   const cQual = p * 2
   const qualite = QUALITE[clamp(ri(Math.round(cQual - 0.8), Math.round(cQual + 0.8)), 0, 2)]
 
-  // Type de question : contexte progressivement requis
-  const type = p < 0.30 || (p < 0.45 && Math.random() > 0.5)
-    ? 'traduction-base'
-    : 'traduction-contexte'
+  // Type de question : genre (niveaux bas), conjugaison (tous niveaux), traduction sinon
+  const r = Math.random()
+  let type
+  if (p < 0.50 && r < 0.15) {
+    type = p < 0.25 ? 'genre-2' : 'genre-4'
+  } else if (r < 0.18) {
+    type = 'conjugaison'
+  } else {
+    type = p < 0.30 || (p < 0.45 && Math.random() > 0.5)
+      ? 'traduction-base'
+      : 'traduction-contexte'
+  }
 
   // Seuil cognate : 1.0 bas → 0.30 haut, ±0.12 de bruit
   const cCognate = 1.0 - p * 0.7
@@ -72,10 +80,9 @@ function genererPourJoueur(joueur, source) {
   const niveau = Math.min(40, Math.max(1, Math.round(joueur.niveau)))
   const preset = genererConfig(niveau)
 
-  const question = genererUne({
+  const params = {
     entrees,
     toutes,
-    type:             preset.type,
     nb_choix:         preset.nb_choix,
     qualite:          preset.qualite,
     niveaux_mot:      preset.niveaux_mot,
@@ -83,7 +90,15 @@ function genererPourJoueur(joueur, source) {
     seuil_cognate:    preset.seuil_cognate,
     source,
     exclure:          joueur.questionsVues,
-  })
+  }
+
+  let question = genererUne({ ...params, type: preset.type })
+
+  // Si genre ou conjugaison indisponibles pour cette source, fallback traduction
+  if (!question && (preset.type === 'conjugaison' || preset.type.startsWith('genre'))) {
+    const fallback = preset.type === 'conjugaison' ? 'traduction-contexte' : 'traduction-base'
+    question = genererUne({ ...params, type: fallback })
+  }
 
   if (question) {
     joueur.questionsVues.add(question.mot)

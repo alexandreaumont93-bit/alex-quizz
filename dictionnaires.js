@@ -16,6 +16,7 @@ const CHAMPS = {
   note:        ["note d'usage", 'note', 'usage'],
   exemple:     ['exemple en contexte', 'exemple', 'example', 'contexte'],
   alt_en:      ['alt en', 'alt_en', 'alternatives en'],
+  formes_alt:  ['formes alt', 'formes_alt'],
 }
 
 function normaliserNature(raw) {
@@ -68,8 +69,10 @@ function parserCSV(contenu) {
     const mot     = matchArticle ? matchArticle[2].trim() : motBrut
     const article = get(cols, 'article') || (matchArticle ? matchArticle[1].toLowerCase() : '')
 
-    const altRaw = get(cols, 'alt_en')
-    const alt_en = altRaw ? altRaw.split('|').map(s => s.trim()).filter(Boolean) : []
+    const altRaw    = get(cols, 'alt_en')
+    const alt_en    = altRaw    ? altRaw.split('|').map(s => s.trim()).filter(Boolean)    : []
+    const formesRaw = get(cols, 'formes_alt')
+    const formes_alt = formesRaw ? formesRaw.split('|').map(s => s.trim()).filter(Boolean) : []
 
     return {
       mot,
@@ -80,6 +83,7 @@ function parserCSV(contenu) {
       définition:  get(cols, 'définition'),
       traduction:  get(cols, 'traduction'),
       alt_en,
+      formes_alt,
       thème:       get(cols, 'thème'),
       note:        get(cols, 'note'),
       exemple:     get(cols, 'exemple'),

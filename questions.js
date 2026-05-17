@@ -109,6 +109,19 @@ function fabriquer(entree, toutes, type, nb_choix, qualite, niveaux_distract, se
       ]),
     }
   }
+  if (type === 'conjugaison') {
+    if (!entree.traduction || !entree.exemple || !entree.formes_alt?.length) return null
+    const nb_dist = Math.min(nb_choix - 1, entree.formes_alt.length)
+    if (nb_dist < 1) return null
+    return {
+      mot:     entree.mot,
+      contexte: entree.exemple,
+      options: melanger([
+        { texte: entree.traduction, correcte: true },
+        ...melanger(entree.formes_alt).slice(0, nb_dist).map(d => ({ texte: d, correcte: false })),
+      ]),
+    }
+  }
   if (type === 'genre-4') {
     if (!entree.article || !entree.mot) return null
     const autres = melanger(toutes.filter(e => e.article && e.mot !== entree.mot)).slice(0, 3)
@@ -135,17 +148,27 @@ function genererUne({ entrees, toutes, type, nb_choix, qualite, source, exclure 
     if (f.length >= 2) candidats = f
   }
 
-  // Filtrer les cognates selon le seuil (graduel avec le niveau de difficulté)
-  if (typeof seuil_cognate === 'number' && seuil_cognate < 1) {
-    const f = candidats.filter(e => similitudeCognate(e.mot, e.traduction) <= seuil_cognate)
-    if (f.length >= 2) candidats = f
+  // Pour les conjugaisons, ne garder que les entrées avec formes_alt
+  if (type === 'conjugaison') {
+    const f = candidats.filter(e => e.formes_alt && e.formes_alt.length > 0)
+    if (f.length === 0) return null
+    candidats = f
+  }
+
+  // Filtrer les cognates (inutile pour conjugaison et genre)
+  if (type === 'traduction-base' || type === 'traduction-contexte') {
+    if (typeof seuil_cognate === 'number' && seuil_cognate < 1) {
+      const f = candidats.filter(e => similitudeCognate(e.mot, e.traduction) <= seuil_cognate)
+      if (f.length >= 2) candidats = f
+    }
   }
 
   const disponibles = exclure.size > 0 ? candidats.filter(e => !exclure.has(e.mot)) : candidats
   const pool = disponibles.length >= 2 ? disponibles : candidats
 
+  const estGenre = type.startsWith('genre')
   for (const entree of melanger(pool)) {
-    const nbEff    = type.startsWith('genre') ? parseInt(type.slice(-1)) : nb_choix
+    const nbEff    = estGenre ? parseInt(type.slice(-1)) : nb_choix
     const resultat = fabriquer(entree, toutes, type, nbEff, qualite, niveaux_distract, seuil_cognate)
     if (!resultat) continue
 
@@ -156,13 +179,13 @@ function genererUne({ entrees, toutes, type, nb_choix, qualite, source, exclure 
       options:   resultat.options,
       contexte:  resultat.contexte,
       info: {
-        article:     entree.article      || '',
-        genre:       entree.genre        || '',
-        nature:      entree.nature       || '',
-        niveau_cecr: entree.niveau_cecr  || '',
-        thème:       entree.thème        || '',
-        syntaxe:     entree.exemple      || '',
-        classe:      entree.nature       || '',
+        article:     estGenre ? '' : (entree.article     || ''),
+        genre:       estGenre ? '' : (entree.genre       || ''),
+        nature:      entree.nature      || '',
+        niveau_cecr: entree.niveau_cecr || '',
+        thème:       entree.thème       || '',
+        syntaxe:     entree.exemple     || '',
+        classe:      entree.nature      || '',
       },
     }
   }
