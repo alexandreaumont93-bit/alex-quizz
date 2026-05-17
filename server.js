@@ -172,7 +172,9 @@ wss.on('connection', (ws) => {
           const q = generateur.genererPourJoueur(joueur, src)
           if (q) {
             joueur.questionEnCours = q
-            diffuserAuxObservateurs('question_generee', { joueur: joueur.nomJeu || joueur.id, question: q })
+            const payload = { joueur: joueur.nomJeu || joueur.id, question: q }
+            diffuserAuxObservateurs('question_generee', payload)
+            diffuserAuTeacher('question_generee', payload)
           }
           return q
         }
@@ -238,7 +240,9 @@ wss.on('connection', (ws) => {
           j.tempsSecondesEnCours   = q.tempsSecondes
           j.questionEnCours        = q
           envoyer(ws, 'question', q)
-          diffuserAuxObservateurs('question_generee', { joueur: j.nomJeu || j.id, question: q })
+          const payload2 = { joueur: j.nomJeu || j.id, question: q }
+          diffuserAuxObservateurs('question_generee', payload2)
+          diffuserAuTeacher('question_generee', payload2)
         }
         break
       }

@@ -72,13 +72,17 @@
     .timer-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; }
 
     .scoreboard { display: flex; flex-direction: column; gap: 0.5rem; }
-    .joueur-ligne { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 10px; transition: background 0.2s; }
+    .joueur-bloc { background: #f8f8f8; border-radius: 10px; overflow: hidden; transition: background 0.2s; }
+    .joueur-ligne { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; }
     .joueur-pos { font-size: 1.1rem; width: 1.75rem; flex-shrink: 0; }
     .joueur-nom { flex: 1; font-weight: 600; color: #222; font-size: 0.95rem; }
     .joueur-niv { font-size: 0.72rem; background: #e8e8e8; color: #777; border-radius: 10px; padding: 0.15rem 0.55rem; font-weight: 600; flex-shrink: 0; }
     .joueur-nb  { font-size: 0.78rem; color: #bbb; flex-shrink: 0; min-width: 4rem; text-align: right; }
     .joueur-score-val { font-weight: 700; color: #111; font-size: 0.95rem; min-width: 5rem; text-align: right; }
     .derniere-rep { font-size: 0.85rem; flex-shrink: 0; }
+    .question-live { padding: 0.4rem 1rem 0.55rem 1rem; border-top: 1px solid #ebebeb; font-size: 0.78rem; color: #555; display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+    .question-live .mot-live { font-weight: 700; color: #111; font-size: 0.9rem; }
+    .question-live .opts-live { color: #999; }
 
     /* ── Résultats ── */
     .podium { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
@@ -274,12 +278,18 @@
       majTimerRace(donnees.secondes)
     }
 
+    if (evenement === 'question_generee') {
+      const j = Object.values(joueursDash).find(j => j.nomJeu === donnees.joueur)
+      if (j) j.questionEnCours = donnees.question
+      majScoreboard()
+    }
+
     if (evenement === 'reponse_recue') {
       const j = Object.values(joueursDash).find(j => j.nomJeu === donnees.nomJeu)
       if (j) {
-        j.score      = donnees.score
-        j.niveau     = donnees.niveau
-        j.nbReponses = donnees.nbReponses
+        j.score       = donnees.score
+        j.niveau      = donnees.niveau
+        j.nbReponses  = donnees.nbReponses
         j.derniereRep = donnees.correcte
       }
       majScoreboard()
@@ -375,15 +385,25 @@
   function majScoreboard() {
     const tries = [...Object.values(joueursDash)].sort((a, b) => b.score - a.score)
     const medailles = ['🥇', '🥈', '🥉']
-    document.getElementById('scoreboard').innerHTML = tries.map((j, i) => `
-      <div class="joueur-ligne">
-        <span class="joueur-pos">${medailles[i] || (i + 1) + '.'}</span>
-        <span class="joueur-nom">${j.nomJeu || j.nomReel}</span>
-        <span class="joueur-niv">Niv.${j.niveau}</span>
-        <span class="joueur-nb">${j.nbReponses} rép.</span>
-        <span class="derniere-rep">${j.derniereRep === true ? '✓' : j.derniereRep === false ? '✗' : ''}</span>
-        <span class="joueur-score-val">${j.score.toLocaleString()} pts</span>
-      </div>`).join('')
+    document.getElementById('scoreboard').innerHTML = tries.map((j, i) => {
+      const q = j.questionEnCours
+      const qHtml = q ? `
+        <div class="question-live">
+          <span class="mot-live">${q.mot}</span>
+          <span class="opts-live">${q.options.map(o => o.texte).join(' · ')}</span>
+        </div>` : ''
+      return `
+      <div class="joueur-bloc">
+        <div class="joueur-ligne">
+          <span class="joueur-pos">${medailles[i] || (i + 1) + '.'}</span>
+          <span class="joueur-nom">${j.nomJeu || j.nomReel}</span>
+          <span class="joueur-niv">Niv.${j.niveau}</span>
+          <span class="joueur-nb">${j.nbReponses} rép.</span>
+          <span class="derniere-rep">${j.derniereRep === true ? '✓' : j.derniereRep === false ? '✗' : ''}</span>
+          <span class="joueur-score-val">${j.score.toLocaleString()} pts</span>
+        </div>${qHtml}
+      </div>`
+    }).join('')
   }
 
   function afficherResultats(classement) {
