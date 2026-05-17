@@ -126,8 +126,9 @@
         <div class="champ">
           <label class="champ-label">Niveau de départ</label>
           <select class="champ-select" id="niveauDepart">
+            <option value="1" selected>1 — Très facile</option>
             <option value="2">2 — Facile</option>
-            <option value="3" selected>3 — Intermédiaire</option>
+            <option value="3">3 — Intermédiaire</option>
             <option value="5">5 — Avancé</option>
           </select>
         </div>
@@ -215,7 +216,7 @@
     if (evenement === 'session_creee') {
       joueursDash = {}
       donnees.joueurs.forEach(j => {
-        joueursDash[j.id] = { ...j, nomJeu: null, connecte: false, score: 0, niveau: configSession.niveauDepart || 3, nbReponses: 0, derniereRep: null }
+        joueursDash[j.id] = { ...j, nomJeu: null, connecte: false, score: 0, niveau: configSession.niveauDepart || 1, nbReponses: 0, derniereRep: null }
       })
       afficher('ecran-lobby')
       document.getElementById('nb-total').textContent = donnees.joueurs.length

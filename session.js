@@ -21,15 +21,25 @@ function creerSession(slots, typeJeu = 'quiz', niveauDepart = 3) {
       score:            0,
       niveau:           niveauDepart,
       difficulteEnCours: niveauDepart,
-      questionsVues:    new Set(),
-      reponses:         [],
+      questionsVues:        new Set(),
+      reponses:             [],
+      erreurConsecutives:   0,
     }
   })
   return { typeJeu, etat: 'attente', joueurs, config: null, creeLe: Date.now() }
 }
 
-function ajusterNiveau(joueur, correcte) {
-  joueur.niveau = Math.min(7, Math.max(1, joueur.niveau + (correcte ? 1 : -1)))
+function ajusterNiveau(joueur, correcte, tempsMsReponse) {
+  if (correcte) {
+    joueur.erreurConsecutives = 0
+    if (tempsMsReponse <= 5000) joueur.niveau = Math.min(7, joueur.niveau + 1)
+  } else {
+    joueur.erreurConsecutives += 1
+    if (joueur.erreurConsecutives >= 2) {
+      joueur.niveau = Math.max(1, joueur.niveau - 1)
+      joueur.erreurConsecutives = 0
+    }
+  }
 }
 
 function joueurRejoindre(session, id, socketId, nomJeu) {

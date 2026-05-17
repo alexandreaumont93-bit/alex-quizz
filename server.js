@@ -91,7 +91,7 @@ wss.on('connection', (ws) => {
         break
 
       case 'configurer_session': {
-        const niveauDepart = donnees.niveauDepart || 3
+        const niveauDepart = donnees.niveauDepart || 1
         sessionActive = session.creerSession(donnees.slots, donnees.typeJeu, niveauDepart)
         envoyer(ws, 'session_creee', {
           joueurs: sessionActive.joueurs.map(j => ({ id: j.id, nomReel: j.nomReel, connecte: false }))
@@ -176,7 +176,7 @@ wss.on('connection', (ws) => {
           donnees.correcte, donnees.tempsMsReponse,
           difficulte
         )
-        session.ajusterNiveau(j, donnees.correcte)
+        session.ajusterNiveau(j, donnees.correcte, donnees.tempsMsReponse)
 
         // Score mis à jour envoyé à l'apprenant
         envoyer(ws, 'score_update', { score: scoreActuel, correcte: donnees.correcte })
