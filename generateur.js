@@ -2,19 +2,24 @@
 const dico = require('./dictionnaires')
 const { genererUne } = require('./questions')
 
-// niveau 1-10 → 5 dimensions : type · nb_choix · qualité distracteurs · CECR mot · CECR distracteurs · temps (s)
+// niveau 1-15 → 5 dimensions : type · nb_choix · qualité distracteurs · CECR mot · CECR distracteurs · temps (s)
 const PRESETS = [
   null,
-  { type: 'traduction-base',     nb_choix: 2, qualite: 'aleatoire',   niveaux_mot: ['A1'],        niveaux_distract: null,         tempsSecondes: 20 }, // 1
-  { type: 'traduction-base',     nb_choix: 2, qualite: 'aleatoire',   niveaux_mot: ['A1','A2'],   niveaux_distract: ['A1'],       tempsSecondes: 18 }, // 2
-  { type: 'traduction-base',     nb_choix: 3, qualite: 'aleatoire',   niveaux_mot: ['A2'],        niveaux_distract: ['A1','A2'],  tempsSecondes: 16 }, // 3
-  { type: 'traduction-base',     nb_choix: 4, qualite: 'aleatoire',   niveaux_mot: ['A2','B1'],   niveaux_distract: ['A1','A2'],  tempsSecondes: 14 }, // 4
-  { type: 'traduction-contexte', nb_choix: 2, qualite: 'aleatoire',   niveaux_mot: ['B1'],        niveaux_distract: ['A2','B1'],  tempsSecondes: 12 }, // 5
-  { type: 'traduction-contexte', nb_choix: 3, qualite: 'aleatoire',   niveaux_mot: ['B1','B2'],   niveaux_distract: ['B1'],       tempsSecondes: 10 }, // 6
-  { type: 'traduction-contexte', nb_choix: 3, qualite: 'meme-theme',  niveaux_mot: ['B2'],        niveaux_distract: ['B1','B2'],  tempsSecondes:  9 }, // 7
-  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-theme',  niveaux_mot: ['B2','C1'],   niveaux_distract: ['B1','B2'],  tempsSecondes:  8 }, // 8
-  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-classe', niveaux_mot: ['C1'],        niveaux_distract: ['B2','C1'],  tempsSecondes:  7 }, // 9
-  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-classe', niveaux_mot: ['C1','C2'],   niveaux_distract: ['C1','C2'],  tempsSecondes:  5 }, // 10
+  { type: 'traduction-base',     nb_choix: 2, qualite: 'aleatoire',   niveaux_mot: ['A1'],        niveaux_distract: null,         tempsSecondes: 20 }, //  1
+  { type: 'traduction-base',     nb_choix: 2, qualite: 'aleatoire',   niveaux_mot: ['A1','A2'],   niveaux_distract: ['A1'],       tempsSecondes: 18 }, //  2
+  { type: 'traduction-base',     nb_choix: 3, qualite: 'aleatoire',   niveaux_mot: ['A2'],        niveaux_distract: ['A1'],       tempsSecondes: 16 }, //  3
+  { type: 'traduction-base',     nb_choix: 3, qualite: 'aleatoire',   niveaux_mot: ['A2','B1'],   niveaux_distract: ['A1','A2'],  tempsSecondes: 14 }, //  4
+  { type: 'traduction-base',     nb_choix: 4, qualite: 'aleatoire',   niveaux_mot: ['B1'],        niveaux_distract: ['A2'],       tempsSecondes: 12 }, //  5
+  { type: 'traduction-contexte', nb_choix: 2, qualite: 'aleatoire',   niveaux_mot: ['B1'],        niveaux_distract: ['A2','B1'],  tempsSecondes: 11 }, //  6
+  { type: 'traduction-contexte', nb_choix: 3, qualite: 'aleatoire',   niveaux_mot: ['B1','B2'],   niveaux_distract: ['B1'],       tempsSecondes: 10 }, //  7
+  { type: 'traduction-contexte', nb_choix: 3, qualite: 'meme-theme',  niveaux_mot: ['B2'],        niveaux_distract: ['B1'],       tempsSecondes:  9 }, //  8
+  { type: 'traduction-contexte', nb_choix: 3, qualite: 'meme-theme',  niveaux_mot: ['B2'],        niveaux_distract: ['B1','B2'],  tempsSecondes:  8 }, //  9
+  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-theme',  niveaux_mot: ['B2','C1'],   niveaux_distract: ['B2'],       tempsSecondes:  7 }, // 10
+  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-theme',  niveaux_mot: ['C1'],        niveaux_distract: ['B2'],       tempsSecondes:  7 }, // 11
+  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-classe', niveaux_mot: ['C1'],        niveaux_distract: ['B2','C1'],  tempsSecondes:  6 }, // 12
+  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-classe', niveaux_mot: ['C1','C2'],   niveaux_distract: ['C1'],       tempsSecondes:  5 }, // 13
+  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-classe', niveaux_mot: ['C1','C2'],   niveaux_distract: ['C1','C2'],  tempsSecondes:  4 }, // 14
+  { type: 'traduction-contexte', nb_choix: 4, qualite: 'meme-classe', niveaux_mot: ['C2'],        niveaux_distract: ['C1','C2'],  tempsSecondes:  3 }, // 15
 ]
 
 const _cache = {}
@@ -29,7 +34,7 @@ function chargerSource(source) {
 
 function genererPourJoueur(joueur, source) {
   const { entrees, toutes } = chargerSource(source)
-  const niveau = Math.min(10, Math.max(1, Math.round(joueur.niveau)))
+  const niveau = Math.min(15, Math.max(1, Math.round(joueur.niveau)))
   const preset = PRESETS[niveau]
 
   const question = genererUne({

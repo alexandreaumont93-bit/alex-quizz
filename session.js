@@ -38,7 +38,7 @@ function creerSession(slots, typeJeu = 'quiz', niveauDepart = 1) {
 function ajusterNiveau(joueur, correcte, tempsMsReponse) {
   if (correcte) {
     joueur.erreurConsecutives = 0
-    if (tempsMsReponse <= 5000) joueur.niveau = Math.min(10, joueur.niveau + 1)
+    if (tempsMsReponse <= 5000) joueur.niveau = Math.min(15, joueur.niveau + 1)
   } else {
     joueur.erreurConsecutives += 1
     if (joueur.erreurConsecutives >= 2) {
