@@ -10,7 +10,8 @@ function demarrer(sessionActive, config, envoyerJoueur, diffuserATous, diffuserA
     if (!joueur.connecte) continue
     const q = genererQuestion(joueur, config.source)
     if (q) {
-      joueur.difficulteEnCours = q.difficulte
+      joueur.difficulteEnCours    = q.difficulte
+      joueur.tempsSecondesEnCours = q.tempsSecondes
       envoyerJoueur(joueur.id, 'question', q)
     }
   }

@@ -24,6 +24,14 @@
 
     /* ── Carte question ── */
     .carte-question { background: white; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 600px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 1.25rem; }
+
+    /* ── Timer par question ── */
+    .tq-barre { height: 5px; background: #f0f0f0; border-radius: 3px; overflow: hidden; margin-bottom: 0.9rem; }
+    .tq-fill  { height: 100%; background: #111; border-radius: 3px; transition: width 0.1s linear; }
+    .tq-fill.urgence { background: #c0392b; }
+    .tq-info  { display: flex; justify-content: flex-end; margin-top: -0.6rem; margin-bottom: 0.6rem; font-size: 0.75rem; color: #bbb; }
+    .tq-info.urgence { color: #c0392b; font-weight: 700; }
+
     .mot { font-size: 2rem; font-weight: 700; color: #111; }
     .info-gram { font-size: 0.82rem; color: #aaa; margin-top: 0.3rem; }
     .contexte { font-size: 0.9rem; color: #666; margin-top: 0.7rem; font-style: italic; line-height: 1.5; border-left: 3px solid #e0e0e0; padding-left: 0.75rem; }
@@ -83,6 +91,8 @@
     </div>
 
     <div class="carte-question" id="carte-question">
+      <div class="tq-barre"><div class="tq-fill" id="tq-fill"></div></div>
+      <div class="tq-info" id="tq-info">—</div>
       <div class="mot" id="mot">—</div>
       <div class="info-gram" id="info-gram"></div>
       <div class="contexte" id="contexte" style="display:none"></div>
@@ -104,13 +114,14 @@
   const ws       = new WebSocket(`${proto}://${window.location.host}`)
   const LETTRES  = ['A', 'B', 'C', 'D']
 
-  let score           = 0
-  let niveau          = 3
-  let dureeTotal      = 0
+  let score            = 0
+  let niveau           = 3
+  let dureeTotal       = 0
   let questionActuelle = null
-  let aRepondu        = false
+  let aRepondu         = false
   let prochainQuestion = null
   let feedbackActif    = false
+  let timerQuestionId  = null
 
   document.getElementById('nom-jeu').textContent = joueur.nomJeu || '—'
 
@@ -196,18 +207,45 @@
       <button class="option" onclick="repondre(${i})" id="opt-${i}">
         <span class="lettre">${LETTRES[i]}</span>${opt.texte}
       </button>`).join('')
+
+    if (donnees.tempsSecondes) demarrerTimerQuestion(donnees.tempsSecondes)
+  }
+
+  function demarrerTimerQuestion(secondes) {
+    clearInterval(timerQuestionId)
+    const finAt  = Date.now() + secondes * 1000
+    const fill   = document.getElementById('tq-fill')
+    const info   = document.getElementById('tq-info')
+    fill.style.transition = 'none'
+    fill.style.width = '100%'
+    fill.className = 'tq-fill'
+    info.className = 'tq-info'
+
+    timerQuestionId = setInterval(() => {
+      const reste = Math.max(0, (finAt - Date.now()) / 1000)
+      const pct   = (reste / secondes) * 100
+      fill.style.transition = 'width 0.1s linear'
+      fill.style.width = pct + '%'
+      info.textContent = Math.ceil(reste) + 's'
+      const urgent = reste <= 3
+      fill.className  = 'tq-fill'  + (urgent ? ' urgence' : '')
+      info.className  = 'tq-info'  + (urgent ? ' urgence' : '')
+      if (reste <= 0) { clearInterval(timerQuestionId); repondre(-1) }
+    }, 100)
   }
 
   function repondre(index) {
     if (aRepondu || !questionActuelle) return
-    aRepondu     = true
+    clearInterval(timerQuestionId)
+    aRepondu      = true
     feedbackActif = true
 
-    const tempsMs  = questionActuelle.tempsDebut ? Date.now() - questionActuelle.tempsDebut : 0
-    const correcte = questionActuelle.options[index].correcte
+    const estTimeout = index === -1
+    const tempsMs    = questionActuelle.tempsDebut ? Date.now() - questionActuelle.tempsDebut : 0
+    const correcte   = !estTimeout && questionActuelle.options[index].correcte
 
     document.querySelectorAll('.option').forEach(b => b.disabled = true)
-    document.getElementById(`opt-${index}`).classList.add(correcte ? 'correct' : 'incorrect')
+    if (!estTimeout) document.getElementById(`opt-${index}`).classList.add(correcte ? 'correct' : 'incorrect')
 
     if (!correcte) {
       const indexCorrect = questionActuelle.options.findIndex(o => o.correcte)
@@ -217,7 +255,12 @@
 
     ws.send(JSON.stringify({
       evenement: 'repondre',
-      donnees: { questionIndex: questionActuelle.index, optionChoisie: index, correcte, tempsMsReponse: tempsMs }
+      donnees: {
+        questionIndex:   questionActuelle.index,
+        optionChoisie:   index,
+        correcte,
+        tempsMsReponse:  estTimeout ? (questionActuelle.tempsSecondes * 1000) : tempsMs,
+      }
     }))
 
     // Afficher la prochaine question après feedback (1.5s)

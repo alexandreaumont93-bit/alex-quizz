@@ -8,31 +8,37 @@ function chargerApprenants() {
     .map(nom => ({ id: nom.toLowerCase().replace(/\s+/g, '-'), nom }))
 }
 
-function creerSession(slots, typeJeu = 'quiz', niveauDepart = 3) {
+function creerSession(slots, typeJeu = 'quiz', niveauDepart = 1) {
   const apprenants = chargerApprenants()
   const joueurs = slots.map(id => {
     const apprenant = apprenants.find(a => a.id === id)
     return {
       id,
-      nomReel:          apprenant ? apprenant.nom : id,
-      nomJeu:           null,
-      socketId:         null,
-      connecte:         false,
-      score:            0,
-      niveau:           niveauDepart,
-      difficulteEnCours: niveauDepart,
-      questionsVues:        new Set(),
-      reponses:             [],
-      erreurConsecutives:   0,
+      nomReel:             apprenant ? apprenant.nom : id,
+      nomJeu:              null,
+      socketId:            null,
+      connecte:            false,
+      score:               0,
+      niveau:              niveauDepart,
+      difficulteEnCours:   niveauDepart,
+      tempsSecondesEnCours: 20,
+      questionsVues:       new Set(),
+      reponses:            [],
+      erreurConsecutives:  0,
     }
   })
   return { typeJeu, etat: 'attente', joueurs, config: null, creeLe: Date.now() }
 }
 
+// Règles d'adaptation :
+// - bonne réponse en ≤ 5s  → monte d'un niveau (max 10)
+// - bonne réponse en > 5s  → reste au même niveau
+// - 1 erreur               → reste au même niveau
+// - 2 erreurs consécutives → descend d'un niveau (min 1), compteur remis à 0
 function ajusterNiveau(joueur, correcte, tempsMsReponse) {
   if (correcte) {
     joueur.erreurConsecutives = 0
-    if (tempsMsReponse <= 5000) joueur.niveau = Math.min(7, joueur.niveau + 1)
+    if (tempsMsReponse <= 5000) joueur.niveau = Math.min(10, joueur.niveau + 1)
   } else {
     joueur.erreurConsecutives += 1
     if (joueur.erreurConsecutives >= 2) {
@@ -61,13 +67,16 @@ function tousConnectes(session) {
   return session.joueurs.every(j => j.connecte)
 }
 
-function enregistrerReponse(session, id, questionIndex, optionChoisie, correcte, tempsMsReponse, difficulte = 1) {
+// vitesse relative au temps alloué pour la question :
+//   répondre en début de timer → vitesse proche de 1 → bonus max
+//   répondre en fin de timer   → vitesse proche de 0 → bonus nul
+function enregistrerReponse(session, id, questionIndex, optionChoisie, correcte, tempsMsReponse, difficulte = 1, tempsSecondes = 10) {
   const joueur = session.joueurs.find(j => j.id === id)
-  if (!joueur) return 0
+  if (!joueur) return { score: 0, delta: 0 }
   joueur.reponses.push({ questionIndex, optionChoisie, correcte, tempsMsReponse })
   const scoreBefore = joueur.score
   if (correcte) {
-    const vitesse = Math.max(0, 1 - tempsMsReponse / 10000)
+    const vitesse = Math.max(0, 1 - tempsMsReponse / (tempsSecondes * 1000))
     joueur.score += Math.round((100 + 200 * vitesse) * difficulte)
   } else {
     joueur.score = Math.max(0, joueur.score - Math.round(400 * difficulte))

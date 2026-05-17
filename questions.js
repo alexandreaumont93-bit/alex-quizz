@@ -1,17 +1,5 @@
 'use strict'
 
-const SCORE_TYPE = {
-  'traduction-base':     1,
-  'traduction-contexte': 2,
-  'genre':               1,
-}
-const SCORE_CHOIX        = { 2: 0, 3: 1, 4: 2 }
-const SCORE_DISTRACTEURS = { 'aleatoire': 0, 'meme-theme': 1, 'meme-classe': 2 }
-
-function calculerDifficulte(type, nb_choix, qualite) {
-  return (SCORE_TYPE[type] || 1) + (SCORE_CHOIX[nb_choix] || 0) + (SCORE_DISTRACTEURS[qualite] || 0)
-}
-
 function melanger(arr) {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
@@ -21,8 +9,15 @@ function melanger(arr) {
   return a
 }
 
-function choisirDistracteurs(entree, toutes, nb, qualite) {
+function choisirDistracteurs(entree, toutes, nb, qualite, niveaux_distract) {
   let pool = toutes.filter(e => e.traduction && e.traduction !== entree.traduction && e.mot !== entree.mot)
+
+  // Filtrer les distracteurs par niveau CECR si précisé
+  if (niveaux_distract && niveaux_distract.length > 0) {
+    const f = pool.filter(e => niveaux_distract.includes(e.niveau_cecr))
+    if (f.length >= nb) pool = f
+  }
+
   if (qualite === 'meme-classe') {
     const f = pool.filter(e => e.nature === entree.nature)
     if (f.length >= nb) pool = f
@@ -30,13 +25,14 @@ function choisirDistracteurs(entree, toutes, nb, qualite) {
     const f = pool.filter(e => e.thème === entree.thème)
     if (f.length >= nb) pool = f
   }
+
   return melanger(pool).slice(0, nb).map(e => e.traduction)
 }
 
-function fabriquer(entree, toutes, type, nb_choix, qualite) {
+function fabriquer(entree, toutes, type, nb_choix, qualite, niveaux_distract) {
   if (type === 'traduction-base') {
     if (!entree.traduction) return null
-    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite)
+    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite, niveaux_distract)
     if (dist.length < nb_choix - 1) return null
     return {
       mot: entree.mot,
@@ -49,7 +45,7 @@ function fabriquer(entree, toutes, type, nb_choix, qualite) {
   }
   if (type === 'traduction-contexte') {
     if (!entree.traduction || !entree.exemple) return null
-    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite)
+    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite, niveaux_distract)
     if (dist.length < nb_choix - 1) return null
     return {
       mot: entree.mot,
@@ -78,7 +74,7 @@ function fabriquer(entree, toutes, type, nb_choix, qualite) {
     if (!entree.article || !entree.mot) return null
     const autres = melanger(toutes.filter(e => e.article && e.mot !== entree.mot)).slice(0, 3)
     if (autres.length < 3) return null
-    const art = entree.article.toLowerCase()
+    const art   = entree.article.toLowerCase()
     const genre = art === 'un' ? 'masculin' : 'féminin'
     return {
       mot: entree.mot,
@@ -92,36 +88,40 @@ function fabriquer(entree, toutes, type, nb_choix, qualite) {
   return null
 }
 
-// Génère une seule question pour un joueur, en évitant les mots déjà vus
-function genererUne({ entrees, toutes, type, nb_choix, qualite, source, exclure = new Set() }) {
-  const disponibles = exclure.size > 0 ? entrees.filter(e => !exclure.has(e.mot)) : entrees
-  const pool = disponibles.length >= 2 ? disponibles : entrees
+function genererUne({ entrees, toutes, type, nb_choix, qualite, source, exclure = new Set(), niveaux_mot, niveaux_distract }) {
+  // Filtrer les candidats par niveau CECR si précisé
+  let candidats = entrees
+  if (niveaux_mot && niveaux_mot.length > 0) {
+    const f = entrees.filter(e => niveaux_mot.includes(e.niveau_cecr))
+    if (f.length >= 2) candidats = f
+  }
+
+  const disponibles = exclure.size > 0 ? candidats.filter(e => !exclure.has(e.mot)) : candidats
+  const pool = disponibles.length >= 2 ? disponibles : candidats
 
   for (const entree of melanger(pool)) {
-    const nbEff = type.startsWith('genre') ? parseInt(type.slice(-1)) : nb_choix
-    const resultat = fabriquer(entree, toutes, type, nbEff, qualite)
+    const nbEff    = type.startsWith('genre') ? parseInt(type.slice(-1)) : nb_choix
+    const resultat = fabriquer(entree, toutes, type, nbEff, qualite, niveaux_distract)
     if (!resultat) continue
 
-    const typeBase = type.startsWith('genre') ? 'genre' : type
     return {
       mot:       resultat.mot,
       source:    source || '',
       type,
-      difficulte: calculerDifficulte(typeBase, resultat.options.length, qualite),
       options:   resultat.options,
       contexte:  resultat.contexte,
       info: {
-        article:    entree.article     || '',
-        genre:      entree.genre       || '',
-        nature:     entree.nature      || '',
-        niveau_cecr: entree.niveau_cecr || '',
-        thème:      entree.thème       || '',
-        syntaxe:    entree.exemple     || '',
-        classe:     entree.nature      || '',
+        article:     entree.article      || '',
+        genre:       entree.genre        || '',
+        nature:      entree.nature       || '',
+        niveau_cecr: entree.niveau_cecr  || '',
+        thème:       entree.thème        || '',
+        syntaxe:     entree.exemple      || '',
+        classe:      entree.nature       || '',
       },
     }
   }
   return null
 }
 
-module.exports = { genererUne, calculerDifficulte, SCORE_TYPE, SCORE_CHOIX, SCORE_DISTRACTEURS }
+module.exports = { genererUne }

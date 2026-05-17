@@ -132,7 +132,7 @@ wss.on('connection', (ws) => {
         // Si la partie est déjà en cours, lui envoyer sa première question
         if (sessionActive.etat === 'en-cours') {
           const q = generateur.genererPourJoueur(joueur, sessionActive.config.source)
-          if (q) { joueur.difficulteEnCours = q.difficulte; envoyer(ws, 'question', q) }
+          if (q) { joueur.difficulteEnCours = q.difficulte; joueur.tempsSecondesEnCours = q.tempsSecondes; envoyer(ws, 'question', q) }
         }
 
         wsJoueurs.forEach(ws2 => envoyer(ws2, 'lobby_update', { joueurs: lobbyJoueurs() }))
@@ -169,12 +169,13 @@ wss.on('connection', (ws) => {
         const j = sessionActive.joueurs.find(p => p.id === ws._joueurId)
         if (!j) break
 
-        const difficulte          = j.difficulteEnCours || 1
+        const difficulte          = j.difficulteEnCours   || 1
+        const tempsSecondes       = j.tempsSecondesEnCours || 10
         const { score, delta }    = session.enregistrerReponse(
           sessionActive, j.id,
           donnees.questionIndex, donnees.optionChoisie,
           donnees.correcte, donnees.tempsMsReponse,
-          difficulte
+          difficulte, tempsSecondes
         )
         session.ajusterNiveau(j, donnees.correcte, donnees.tempsMsReponse)
 
@@ -191,7 +192,8 @@ wss.on('connection', (ws) => {
         // Question suivante immédiatement
         const q = generateur.genererPourJoueur(j, sessionActive.config.source)
         if (q) {
-          j.difficulteEnCours = q.difficulte
+          j.difficulteEnCours      = q.difficulte
+          j.tempsSecondesEnCours   = q.tempsSecondes
           envoyer(ws, 'question', q)
         }
         break
