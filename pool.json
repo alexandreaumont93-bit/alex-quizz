@@ -1,0 +1,454 @@
+[
+  {
+    "mot": "respirer",
+    "info": {
+      "mot": "respirer",
+      "classe": "verbe",
+      "morphs": [
+        {
+          "VerbForm": "Inf"
+        }
+      ],
+      "conjugaison": {
+        "mode": "",
+        "temps": ""
+      },
+      "syntaxe": "Sorti de la guerre, je me trouvais à la tête d’une prime de démobilisation minuscule mais avec le grand désir de respirer un peu d’air pur.",
+      "contextes": [
+        "À dire vrai, la chose même n’avait pas marqué\nen moi : je l’avais considérée comme un dada, une collection de timbres, et oubliée.\nSorti de la guerre, je me trouvais à la tête d’une prime de démobilisation minuscule mais avec le grand\ndésir de respirer un peu d’air pur."
+      ],
+      "similaires": [
+        "souffler",
+        "marcher",
+        "sentir"
+      ],
+      "traduction_en": "breathe"
+    },
+    "options": [
+      {
+        "texte": "note",
+        "correcte": false
+      },
+      {
+        "texte": "breathe",
+        "correcte": true
+      },
+      {
+        "texte": "go",
+        "correcte": false
+      },
+      {
+        "texte": "intrigue",
+        "correcte": false
+      }
+    ],
+    "id": "60f8a533-4d83-4490-beb1-cc56423da783",
+    "statut": "accepted"
+  },
+  {
+    "mot": "douceur",
+    "info": {
+      "mot": "douceur",
+      "classe": "nom",
+      "morphs": [
+        {
+          "Gender": "Fem",
+          "Number": "Sing"
+        }
+      ],
+      "conjugaison": null,
+      "syntaxe": "Si on compte l’ancienne population, méconnaissable depuis qu’elle vit avec douceur et les nouveaux venus, plus de dix mille personnes doivent leur bonheur à Elzéard Bouffier.",
+      "contextes": [
+        "Si on compte l’ancienne population, méconnaissable depuis qu’elle vit avec douceur\net les nouveaux venus, plus de dix mille personnes doivent leur bonheur à Elzéard Bouffier."
+      ],
+      "similaires": [
+        "délicatesse"
+      ],
+      "traduction_en": "gentleness"
+    },
+    "options": [
+      {
+        "texte": "gentleness",
+        "correcte": true
+      },
+      {
+        "texte": "rewards",
+        "correcte": false
+      },
+      {
+        "texte": "wasp",
+        "correcte": false
+      },
+      {
+        "texte": "place",
+        "correcte": false
+      }
+    ],
+    "id": "ad0e5941-f8e1-405e-b614-47c8cf5e568e",
+    "statut": "accepted"
+  },
+  {
+    "mot": "écossais",
+    "info": {
+      "mot": "écossais",
+      "classe": "adjectif",
+      "morphs": [
+        {
+          "Gender": "Fem",
+          "Number": "Sing"
+        }
+      ],
+      "conjugaison": null,
+      "syntaxe": "qualités craquent sous cette perpétuelle douche écossaise.",
+      "contextes": [
+        "qualités craquent sous cette perpétuelle douche écossaise."
+      ],
+      "similaires": [],
+      "traduction_en": "scottish"
+    },
+    "options": [
+      {
+        "texte": "insensitive",
+        "correcte": false
+      },
+      {
+        "texte": "immense",
+        "correcte": false
+      },
+      {
+        "texte": "scottish",
+        "correcte": true
+      },
+      {
+        "texte": "new",
+        "correcte": false
+      }
+    ],
+    "id": "c5afe367-dff9-47ce-ad33-ecb530f99430",
+    "statut": "accepted"
+  },
+  {
+    "mot": "neige",
+    "info": {
+      "mot": "neige",
+      "classe": "nom",
+      "morphs": [
+        {
+          "Gender": "Fem",
+          "Number": "Plur"
+        }
+      ],
+      "conjugaison": null,
+      "syntaxe": "Les vieilles sources, alimentées par les pluies et les neiges que retiennent les forêts, se sont remises à couler.",
+      "contextes": [
+        "Les vieilles sources,\nalimentées par les pluies et les neiges que retiennent les forêts, se sont remises à couler."
+      ],
+      "similaires": [
+        "pluie"
+      ],
+      "traduction_en": "snow"
+    },
+    "options": [
+      {
+        "texte": "gentleness",
+        "correcte": false
+      },
+      {
+        "texte": "automobile",
+        "correcte": false
+      },
+      {
+        "texte": "way",
+        "correcte": false
+      },
+      {
+        "texte": "snow",
+        "correcte": true
+      }
+    ],
+    "id": "46e4b4e1-17a7-4bad-a513-4778a203e28b",
+    "statut": "accepted"
+  },
+  {
+    "mot": "non",
+    "info": {
+      "mot": "non",
+      "classe": "adverbe",
+      "morphs": [],
+      "conjugaison": null,
+      "syntaxe": "Il me répondit que non.",
+      "contextes": [
+        "Il me répondit que non.",
+        "C’est grâce à ce capitaine que, non seulement la forêt, mais le bonheur de cet homme furent protégés."
+      ],
+      "similaires": [],
+      "traduction_en": "no"
+    },
+    "options": [
+      {
+        "texte": "besides",
+        "correcte": false
+      },
+      {
+        "texte": "poorly",
+        "correcte": false
+      },
+      {
+        "texte": "absolutely",
+        "correcte": false
+      },
+      {
+        "texte": "no",
+        "correcte": true
+      }
+    ],
+    "id": "60e2d8a7-66b1-420d-ba56-7129a97d2cc0",
+    "statut": "accepted"
+  },
+  {
+    "mot": "mystère",
+    "info": {
+      "mot": "mystère",
+      "classe": "nom",
+      "morphs": [
+        {
+          "Gender": "Masc",
+          "Number": "Sing"
+        }
+      ],
+      "conjugaison": null,
+      "syntaxe": "Je lui expliquai le mystère.",
+      "contextes": [
+        "Je lui expliquai le mystère."
+      ],
+      "similaires": [],
+      "traduction_en": "mystery"
+    },
+    "options": [
+      {
+        "texte": "despair",
+        "correcte": false
+      },
+      {
+        "texte": "mystery",
+        "correcte": true
+      },
+      {
+        "texte": "fortune",
+        "correcte": false
+      },
+      {
+        "texte": "being",
+        "correcte": false
+      }
+    ],
+    "id": "48baef2d-8cab-48ae-bcff-81b3cdd284ea",
+    "statut": "accepted"
+  },
+  {
+    "mot": "œuf",
+    "info": {
+      "mot": "œuf",
+      "classe": "nom",
+      "morphs": [
+        {
+          "Gender": "Masc",
+          "Number": "Plur"
+        }
+      ],
+      "conjugaison": null,
+      "syntaxe": "J’offris les quelques œufs que j’avais apportés en présent.",
+      "contextes": [
+        "J’offris les quelques œufs que j’avais apportés en présent."
+      ],
+      "similaires": [],
+      "traduction_en": "egg"
+    },
+    "options": [
+      {
+        "texte": "modification",
+        "correcte": false
+      },
+      {
+        "texte": "sun",
+        "correcte": false
+      },
+      {
+        "texte": "egg",
+        "correcte": true
+      },
+      {
+        "texte": "indeed",
+        "correcte": false
+      }
+    ],
+    "id": "7accbe86-1681-49a9-a2b3-389757a9185f",
+    "statut": "accepted"
+  },
+  {
+    "mot": "demander",
+    "info": {
+      "mot": "demander",
+      "classe": "verbe",
+      "morphs": [
+        {
+          "Mood": "Ind",
+          "Number": "Sing",
+          "Person": "3",
+          "Tense": "Past",
+          "VerbForm": "Fin"
+        },
+        {
+          "Mood": "Ind",
+          "Number": "Sing",
+          "Person": "1",
+          "Tense": "Pres",
+          "VerbForm": "Fin"
+        },
+        {
+          "Mood": "Ind",
+          "Number": "Sing",
+          "Person": "1",
+          "Tense": "Imp",
+          "VerbForm": "Fin"
+        },
+        {
+          "VerbForm": "Inf"
+        }
+      ],
+      "conjugaison": {
+        "mode": "indicatif",
+        "temps": "passe"
+      },
+      "syntaxe": "Je lui demandai le lendemain la permission de me reposer tout le jour chez lui.",
+      "contextes": [
+        "Je lui demandai le lendemain la permission de me reposer\ntout le jour chez lui.",
+        "Je lui demandai si\nla terre lui appartenait.",
+        "Je me demandais combien d’hectares il allait encore couvrir d’arbres.",
+        "Un Américain est venu me voir dernièrement pour me demander\nl’autorisation de faire tirer ce texte à 100 000 exemplaires pour les répandre gratuitement\nen Amérique (ce que j’ai bien entendu accepté)."
+      ],
+      "similaires": [
+        "décider",
+        "accepter",
+        "appeler",
+        "recevoir",
+        "donner"
+      ],
+      "traduction_en": "ask"
+    },
+    "options": [
+      {
+        "texte": "disembark",
+        "correcte": false
+      },
+      {
+        "texte": "ask",
+        "correcte": true
+      },
+      {
+        "texte": "align",
+        "correcte": false
+      },
+      {
+        "texte": "disappoint",
+        "correcte": false
+      }
+    ],
+    "id": "ccbb4893-b39f-49e8-8a45-09fd489c4120",
+    "statut": "accepted"
+  },
+  {
+    "mot": "répandre",
+    "info": {
+      "mot": "répandre",
+      "classe": "verbe",
+      "morphs": [
+        {
+          "Gender": "Masc",
+          "Number": "Plur",
+          "Tense": "Past",
+          "VerbForm": "Part"
+        },
+        {
+          "VerbForm": "Inf"
+        }
+      ],
+      "conjugaison": {
+        "mode": "",
+        "temps": "passe"
+      },
+      "syntaxe": "Il avait suivi son idée, et les hêtres qui m’arrivaient aux épaules, répandus à perte de vue, en témoignaient.",
+      "contextes": [
+        "Il avait suivi son idée, et les hêtres qui m’arrivaient aux épaules, répandus à perte de vue, en\ntémoignaient.",
+        "Un Américain est venu me voir dernièrement pour me demander\nl’autorisation de faire tirer ce texte à 100 000 exemplaires pour les répandre gratuitement\nen Amérique (ce que j’ai bien entendu accepté)."
+      ],
+      "similaires": [
+        "déverser",
+        "disperser"
+      ],
+      "traduction_en": "spread"
+    },
+    "options": [
+      {
+        "texte": "crack",
+        "correcte": false
+      },
+      {
+        "texte": "undertake",
+        "correcte": false
+      },
+      {
+        "texte": "read",
+        "correcte": false
+      },
+      {
+        "texte": "spread",
+        "correcte": true
+      }
+    ],
+    "id": "7664c89f-6e2e-4187-8af9-ff2ccf3b8cf2",
+    "statut": "accepted"
+  },
+  {
+    "mot": "santé",
+    "info": {
+      "mot": "santé",
+      "classe": "nom",
+      "morphs": [
+        {
+          "Gender": "Fem",
+          "Number": "Sing"
+        }
+      ],
+      "conjugaison": null,
+      "syntaxe": "Car il était impossible de n’être pas subjugué par la beauté de ces jeunes arbres en pleine santé.",
+      "contextes": [
+        "Car il était impossible de\nn’être pas subjugué par la beauté de ces jeunes arbres en pleine santé.",
+        "Le travail paisible et régulier, l’air vif des hauteurs, la frugalité et\nsurtout la sérénité de l’âme avaient donné à ce vieillard une santé presque solennelle.",
+        "Il n’a fallu que les huit ans qui nous séparent de cette époque pour que tout le pays resplendisse de\nsanté et d’aisance."
+      ],
+      "similaires": [],
+      "traduction_en": "health"
+    },
+    "options": [
+      {
+        "texte": "country",
+        "correcte": false
+      },
+      {
+        "texte": "health",
+        "correcte": true
+      },
+      {
+        "texte": "undulation",
+        "correcte": false
+      },
+      {
+        "texte": "magnitude",
+        "correcte": false
+      }
+    ],
+    "id": "1da68c9b-20cc-42be-a9fc-8363c64d34c4",
+    "statut": "accepted"
+  }
+]

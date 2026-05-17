@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enseignant — Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f0f0f0; min-height: 100vh; padding: 2rem; }
+    h1 { font-size: 1.3rem; font-weight: 600; color: #111; margin-bottom: 1.5rem; }
+    h2 { font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
+    .section { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    label { display: block; font-size: 0.8rem; font-weight: 500; color: #555; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: white; }
+    .slots { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+    .slot { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1rem; min-width: 160px; flex: 1; }
+    .slot label { margin-bottom: 0.4rem; }
+    .slot select { width: 100%; }
+    .slot .statut { margin-top: 0.5rem; font-size: 0.8rem; color: #999; }
+    .slot.connecte { border-color: #27ae60; background: #f0faf4; }
+    .slot.connecte .statut { color: #27ae60; font-weight: 500; }
+    .btn { padding: 0.65rem 1.2rem; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+    .btn-principal { background: #111; color: white; }
+    .btn-principal:hover { background: #333; }
+    .btn-principal:disabled { background: #ccc; cursor: default; }
+    .btn-secondaire { background: #eee; color: #333; }
+    .btn-secondaire:hover { background: #ddd; }
+    .rangee { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.78rem; font-weight: 500; }
+    .badge-attente { background: #f0f0f0; color: #888; }
+    .badge-ok { background: #eafaf1; color: #27ae60; }
+    .lien-bloc { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.25rem; }
+    .lien-url { font-family: monospace; font-size: 0.95rem; color: #111; background: #f4f4f4; border-radius: 6px; padding: 0.35rem 0.6rem; }
+    .btn-copier { padding: 0.35rem 0.75rem; background: #eee; border: none; border-radius: 6px; font-size: 0.82rem; cursor: pointer; color: #333; }
+    .btn-copier:hover { background: #ddd; }
+    .btn-copier.copie { background: #eafaf1; color: #27ae60; }
+
+    /* Dashboard en jeu */
+    .question-box { background: #f8f8f8; border-radius: 10px; padding: 1.2rem; margin-bottom: 1rem; }
+    .question-mot { font-size: 2rem; font-weight: 700; color: #111; }
+    .question-info { font-size: 0.85rem; color: #777; margin-top: 0.3rem; }
+    .joueur-ligne { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #f0f0f0; }
+    .joueur-ligne:last-child { border-bottom: none; }
+    .joueur-nom { font-weight: 500; color: #222; }
+    .joueur-score { font-size: 0.85rem; color: #666; }
+    .reponse-ok { color: #27ae60; font-weight: 600; }
+    .reponse-non { color: #c0392b; }
+    .timer { font-size: 2.5rem; font-weight: 700; color: #111; text-align: center; padding: 0.5rem 0; }
+
+    /* Podium */
+    .podium { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
+    .podium-place { text-align: center; }
+    .podium-barre { background: #ddd; border-radius: 6px 6px 0 0; width: 80px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.5rem; font-size: 1.5rem; }
+    .podium-barre.p1 { height: 120px; background: #f1c40f; }
+    .podium-barre.p2 { height: 85px; background: #bdc3c7; }
+    .podium-barre.p3 { height: 60px; background: #cd7f32; }
+    .podium-nom { font-size: 0.85rem; font-weight: 600; margin-top: 0.4rem; color: #333; }
+    .podium-score { font-size: 0.78rem; color: #777; }
+  </style>
+</head>
+<body>
+
+  <!-- SECTION : Configuration -->
+  <div id="section-config">
+    <div class="section">
+      <h1>Configurer la partie</h1>
+      <div class="rangee">
+        <div>
+          <label>Nombre de joueurs</label>
+          <select id="nbJoueurs" onchange="mettreAJourSlots()">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3" selected>3</option>
+          </select>
+        </div>
+        <div>
+          <label>Type de jeu</label>
+          <select id="typeJeu">
+            <option value="quiz">Quiz</option>
+          </select>
+        </div>
+        <div>
+          <label>Questions</label>
+          <select id="nbQuestions">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Joueurs</h2>
+      <div class="slots" id="slots"></div>
+      <div style="margin-top:1.2rem">
+        <button class="btn btn-principal" id="btn-creer" onclick="creerSession()">Créer la session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION : Lobby -->
+  <div id="section-lobby" style="display:none">
+    <div class="section">
+      <h2>Session en attente</h2>
+      <div id="liste-joueurs-lobby"></div>
+      <div style="margin-top:1.2rem">
+        <button class="btn btn-principal" id="btn-lancer" onclick="lancerJeu()" disabled>Lancer la partie</button>
+        <div class="lien-bloc" id="lien-info" style="display:none">
+          <span style="font-size:0.85rem;color:#777">Lien apprenants :</span>
+          <span class="lien-url" id="lien-url"></span>
+          <button class="btn-copier" id="btn-copier" onclick="copierLien()">Copier</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION : En jeu -->
+  <div id="section-jeu" style="display:none">
+    <div class="section">
+      <div class="timer" id="timer">—</div>
+      <div class="question-box" id="question-courante"></div>
+    </div>
+    <div class="section">
+      <h2>Joueurs</h2>
+      <div id="liste-joueurs-jeu"></div>
+    </div>
+  </div>
+
+  <!-- SECTION : Résultats -->
+  <div id="section-resultats" style="display:none">
+    <div class="section">
+      <h1>Résultats</h1>
+      <div class="podium" id="podium"></div>
+      <div id="stats-detaillees" style="margin-top:1.5rem"></div>
+    </div>
+  </div>
+
+  <script>
+    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${proto}://${window.location.host}`);
+    let apprenants = [];
+    let joueursDashboard = {};
+
+    ws.onopen = () => ws.send(JSON.stringify({ evenement: 'teacher_connecte' }));
+
+    ws.onmessage = (e) => {
+      const { evenement, donnees } = JSON.parse(e.data);
+
+      if (evenement === 'apprenants_disponibles') {
+        apprenants = donnees.apprenants;
+        mettreAJourSlots();
+      }
+
+      if (evenement === 'session_creee') {
+        joueursDashboard = {};
+        donnees.joueurs.forEach(j => joueursDashboard[j.id] = { ...j, nomJeu: '—', repondu: false, correcte: null, score: 0 });
+        afficherLobby();
+        fetch('/api/infos').then(r => r.json()).then(({ url }) => {
+          document.getElementById('lien-url').textContent = url;
+          document.getElementById('lien-info').style.display = 'flex';
+        }).catch(() => {
+          document.getElementById('lien-url').textContent = window.location.origin;
+          document.getElementById('lien-info').style.display = 'flex';
+        });
+      }
+
+      if (evenement === 'joueur_connecte') {
+        if (joueursDashboard[donnees.id]) {
+          joueursDashboard[donnees.id].nomJeu = donnees.nomJeu;
+          joueursDashboard[donnees.id].connecte = true;
+        }
+        rafraichirLobby();
+      }
+
+      if (evenement === 'tous_connectes') {
+        document.getElementById('btn-lancer').disabled = false;
+      }
+
+      if (evenement === 'statut') {
+        document.getElementById('timer').textContent = '⏳';
+        document.getElementById('question-courante').innerHTML =
+          `<div style="text-align:center;color:#777;font-size:1rem">${donnees.message}</div>`;
+      }
+
+      if (evenement === 'question') {
+        afficherSectionJeu(donnees);
+        reinitialiserReponses();
+      }
+
+      if (evenement === 'timer') {
+        document.getElementById('timer').textContent = donnees.secondes;
+      }
+
+      if (evenement === 'reponse_recue') {
+        const joueur = Object.values(joueursDashboard).find(j => j.nomJeu === donnees.nomJeu);
+        if (joueur) {
+          joueur.repondu = true;
+          joueur.correcte = donnees.correcte;
+          if (donnees.score !== undefined) joueur.score = donnees.score;
+        }
+        rafraichirJoueursDashboard();
+      }
+
+      if (evenement === 'partie_terminee') {
+        afficherResultats(donnees.classement);
+      }
+    };
+
+    function mettreAJourSlots() {
+      const n = parseInt(document.getElementById('nbJoueurs').value);
+      const container = document.getElementById('slots');
+      container.innerHTML = '';
+      for (let i = 0; i < n; i++) {
+        const options = apprenants.map(a => `<option value="${a.id}">${a.nom}</option>`).join('');
+        container.innerHTML += `
+          <div class="slot" id="slot-${i}">
+            <label>Joueur ${i + 1}</label>
+            <select id="slot-select-${i}">${options}</select>
+            <div class="statut" id="slot-statut-${i}">En attente…</div>
+          </div>`;
+      }
+    }
+
+    function creerSession() {
+      const n = parseInt(document.getElementById('nbJoueurs').value);
+      const slots = [];
+      for (let i = 0; i < n; i++) slots.push(document.getElementById(`slot-select-${i}`).value);
+      const typeJeu = document.getElementById('typeJeu').value;
+      const nbQuestions = parseInt(document.getElementById('nbQuestions').value);
+      sessionStorage.setItem('nbQuestions', nbQuestions);
+      ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots, typeJeu } }));
+    }
+
+    function afficherLobby() {
+      document.getElementById('section-config').style.display = 'none';
+      document.getElementById('section-lobby').style.display = 'block';
+      rafraichirLobby();
+    }
+
+    function rafraichirLobby() {
+      const container = document.getElementById('liste-joueurs-lobby');
+      container.innerHTML = Object.values(joueursDashboard).map(j => `
+        <div class="joueur-ligne">
+          <span class="joueur-nom">${j.nomReel}</span>
+          <span class="badge ${j.connecte ? 'badge-ok' : 'badge-attente'}">
+            ${j.connecte ? j.nomJeu + ' ✓' : 'En attente…'}
+          </span>
+        </div>`).join('');
+    }
+
+    function copierLien() {
+      const url = document.getElementById('lien-url').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('btn-copier');
+        btn.textContent = 'Copié !';
+        btn.classList.add('copie');
+        setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copie'); }, 2000);
+      });
+    }
+
+    function lancerJeu() {
+      const nbQuestions = parseInt(sessionStorage.getItem('nbQuestions') || '10');
+      ws.send(JSON.stringify({ evenement: 'lancer_jeu', donnees: { nbQuestions } }));
+      document.getElementById('section-lobby').style.display = 'none';
+      document.getElementById('section-jeu').style.display = 'block';
+    }
+
+    function afficherSectionJeu(question) {
+      const box = document.getElementById('question-courante');
+      const infos = [question.info.classe, question.info.genre !== 'non applicable' ? question.info.genre : null].filter(Boolean).join(' · ');
+      box.innerHTML = `
+        <div class="question-mot">${question.mot}</div>
+        <div class="question-info">${infos}</div>
+        <div class="question-info" style="margin-top:0.4rem;font-style:italic">${question.info.syntaxe || ''}</div>`;
+      rafraichirJoueursDashboard();
+    }
+
+    function reinitialiserReponses() {
+      Object.values(joueursDashboard).forEach(j => { j.repondu = false; j.correcte = null; });
+      rafraichirJoueursDashboard();
+    }
+
+    function rafraichirJoueursDashboard() {
+      const container = document.getElementById('liste-joueurs-jeu');
+      container.innerHTML = Object.values(joueursDashboard).map(j => `
+        <div class="joueur-ligne">
+          <span class="joueur-nom">${j.nomJeu}</span>
+          <span class="${j.repondu ? (j.correcte ? 'reponse-ok' : 'reponse-non') : ''}">
+            ${j.repondu ? (j.correcte ? '✓ Correct' : '✗ Raté') : '…'}
+          </span>
+          <span class="joueur-score">${j.score || 0} pts</span>
+        </div>`).join('');
+    }
+
+    function afficherResultats(classement) {
+      document.getElementById('section-jeu').style.display = 'none';
+      document.getElementById('section-resultats').style.display = 'block';
+      const podium = document.getElementById('podium');
+      const ordre = [classement[1], classement[0], classement[2]].filter(Boolean);
+      const classes = ['p2', 'p1', 'p3'];
+      const medailles = ['🥈', '🥇', '🥉'];
+      podium.innerHTML = ordre.map((j, i) => `
+        <div class="podium-place">
+          <div class="podium-barre ${classes[i]}">${medailles[i]}</div>
+          <div class="podium-nom">${j.nomJeu}</div>
+          <div class="podium-score">${j.score} pts</div>
+        </div>`).join('');
+    }
+  </script>
+</body>
+</html>

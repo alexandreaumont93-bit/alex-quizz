@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Validation des questions</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f5f5f5; color: #222; padding: 2rem; }
+    h1 { font-size: 1.4rem; margin-bottom: 1.5rem; }
+
+    #stats { display: flex; gap: 1.5rem; margin-bottom: 2rem; font-size: 0.9rem; }
+    .stat { background: #fff; border-radius: 8px; padding: 0.6rem 1.2rem; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .stat span { font-weight: bold; }
+    .stat.pending span { color: #e69c00; }
+    .stat.accepted span { color: #2e8b57; }
+    .stat.rejected span { color: #c0392b; }
+
+    #carte {
+      background: #fff;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 600px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
+    }
+
+    #mot { font-size: 2rem; font-weight: bold; margin-bottom: 0.3rem; }
+    #classe { font-size: 0.85rem; color: #888; margin-bottom: 1.2rem; }
+    #contexte { font-size: 0.9rem; color: #555; font-style: italic; margin-bottom: 1.5rem; border-left: 3px solid #ddd; padding-left: 0.8rem; }
+
+    .options { display: grid; gap: 0.6rem; margin-bottom: 2rem; }
+    .option {
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+      font-size: 0.95rem;
+      background: #fafafa;
+    }
+    .option.correcte { border-color: #2e8b57; background: #f0fff4; font-weight: bold; }
+
+    .actions { display: flex; gap: 1rem; }
+    button {
+      flex: 1;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+    #btn-accept { background: #2e8b57; color: #fff; }
+    #btn-reject { background: #c0392b; color: #fff; }
+
+    #zone-commentaire {
+      display: none;
+      margin-top: 1rem;
+      border-top: 1px solid #eee;
+      padding-top: 1rem;
+    }
+    #zone-commentaire label {
+      font-size: 0.85rem;
+      color: #666;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+    #commentaire {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 70px;
+    }
+    #commentaire:focus { outline: none; border-color: #c0392b; }
+    #btn-confirmer-rejet {
+      margin-top: 0.6rem;
+      width: 100%;
+      padding: 0.7rem;
+      background: #c0392b;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #btn-confirmer-rejet:hover { opacity: 0.85; }
+    #btn-annuler {
+      margin-top: 0.4rem;
+      width: 100%;
+      padding: 0.5rem;
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    #btn-annuler:hover { color: #555; }
+
+    #zone-precedent {
+      display: none;
+      margin-top: 1.2rem;
+      text-align: center;
+    }
+    #btn-precedent {
+      background: none;
+      border: 1px solid #bbb;
+      color: #666;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: normal;
+      flex: none;
+      width: auto;
+    }
+    #btn-precedent:hover { background: #f0f0f0; color: #333; opacity: 1; }
+
+    #vide { display: none; text-align: center; color: #888; padding: 3rem; }
+  </style>
+</head>
+<body>
+  <h1>Validation des questions</h1>
+
+  <div id="stats">
+    <div class="stat pending">En attente : <span id="s-pending">—</span></div>
+    <div class="stat accepted">Acceptées : <span id="s-accepted">—</span></div>
+    <div class="stat rejected">Rejetées : <span id="s-rejected">—</span></div>
+  </div>
+
+  <div id="carte">
+    <div id="mot"></div>
+    <div id="classe"></div>
+    <div id="contexte"></div>
+    <div class="options" id="options"></div>
+    <div class="actions">
+      <button id="btn-reject">Rejeter</button>
+      <button id="btn-accept">Accepter</button>
+    </div>
+
+    <div id="zone-commentaire">
+      <label>Raison du rejet (optionnel) :</label>
+      <textarea id="commentaire" placeholder="Ex: mauvaise traduction, distracteurs trop proches, mot trop rare..."></textarea>
+      <button id="btn-confirmer-rejet">Confirmer le rejet</button>
+      <button id="btn-annuler">Annuler</button>
+    </div>
+
+    <div id="zone-precedent">
+      <button id="btn-precedent">← Revenir à la question précédente</button>
+    </div>
+  </div>
+
+  <div id="vide">Plus aucune question en attente.</div>
+
+  <script>
+    let questionCourante = null;
+    let questionPrecedente = null;
+
+    function majStats(stats) {
+      document.getElementById('s-pending').textContent = stats.pending;
+      document.getElementById('s-accepted').textContent = stats.accepted;
+      document.getElementById('s-rejected').textContent = stats.rejected;
+    }
+
+    function afficherQuestion(question) {
+      questionCourante = question;
+      document.getElementById('mot').textContent = question.mot;
+      document.getElementById('classe').textContent = question.info?.classe || '';
+      document.getElementById('contexte').textContent = question.info?.syntaxe || '';
+
+      const conteneur = document.getElementById('options');
+      conteneur.innerHTML = '';
+      question.options.forEach(opt => {
+        const div = document.createElement('div');
+        div.className = 'option' + (opt.correcte ? ' correcte' : '');
+        div.textContent = opt.texte;
+        conteneur.appendChild(div);
+      });
+    }
+
+    async function chargerProchaine() {
+      cacherCommentaire();
+      const res = await fetch('/api/questions/pending');
+      const { question, stats } = await res.json();
+      majStats(stats);
+
+      if (!question) {
+        document.getElementById('carte').style.display = 'none';
+        document.getElementById('vide').style.display = 'block';
+        return;
+      }
+
+      afficherQuestion(question);
+    }
+
+    function cacherCommentaire() {
+      document.getElementById('zone-commentaire').style.display = 'none';
+      document.getElementById('commentaire').value = '';
+      document.querySelector('.actions').style.display = 'flex';
+    }
+
+    function montrerBoutonPrecedent() {
+      document.getElementById('zone-precedent').style.display = questionPrecedente ? 'block' : 'none';
+    }
+
+    async function accepter() {
+      if (!questionCourante) return;
+      await fetch(`/api/questions/${questionCourante.id}/accept`, { method: 'POST' });
+      questionPrecedente = questionCourante;
+      montrerBoutonPrecedent();
+      chargerProchaine();
+    }
+
+    async function rejeter() {
+      if (!questionCourante) return;
+      const commentaire = document.getElementById('commentaire').value.trim();
+      await fetch(`/api/questions/${questionCourante.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ commentaire }),
+      });
+      questionPrecedente = questionCourante;
+      montrerBoutonPrecedent();
+      chargerProchaine();
+    }
+
+    async function revenirPrecedente() {
+      if (!questionPrecedente) return;
+      const res = await fetch(`/api/questions/${questionPrecedente.id}/reset`, { method: 'POST' });
+      const { question, stats } = await res.json();
+      majStats(stats);
+      afficherQuestion(question);
+      questionPrecedente = null;
+      document.getElementById('zone-precedent').style.display = 'none';
+      cacherCommentaire();
+    }
+
+    document.getElementById('btn-accept').addEventListener('click', accepter);
+
+    document.getElementById('btn-reject').addEventListener('click', () => {
+      document.querySelector('.actions').style.display = 'none';
+      document.getElementById('zone-commentaire').style.display = 'block';
+      document.getElementById('commentaire').focus();
+    });
+
+    document.getElementById('btn-confirmer-rejet').addEventListener('click', rejeter);
+    document.getElementById('btn-annuler').addEventListener('click', cacherCommentaire);
+    document.getElementById('btn-precedent').addEventListener('click', revenirPrecedente);
+
+    chargerProchaine();
+  </script>
+</body>
+</html>

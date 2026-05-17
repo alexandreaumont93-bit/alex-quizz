@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f0f0f0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 1.5rem 1rem; }
+
+    .entete { width: 100%; max-width: 600px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .nom-jeu { font-weight: 600; color: #333; }
+    .score { font-size: 0.9rem; color: #666; }
+
+    .timer { font-size: 3rem; font-weight: 700; color: #111; margin-bottom: 1rem; min-width: 2.5rem; text-align: center; }
+    .timer.urgence { color: #c0392b; }
+
+    .carte-question { background: white; border-radius: 14px; padding: 1.5rem; width: 100%; max-width: 600px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); margin-bottom: 1.5rem; text-align: center; }
+    .mot { font-size: 2.2rem; font-weight: 700; color: #111; }
+    .info-gram { font-size: 0.85rem; color: #888; margin-top: 0.4rem; }
+    .syntaxe { font-size: 0.9rem; color: #777; margin-top: 0.5rem; font-style: italic; }
+
+    .options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; width: 100%; max-width: 600px; }
+    .option { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1rem; font-size: 1rem; cursor: pointer; text-align: left; transition: border-color 0.15s; }
+    .option:hover:not(:disabled) { border-color: #aaa; }
+    .option:disabled { cursor: default; }
+    .option.selectionne { border-color: #555; background: #f8f8f8; }
+    .option.correct { border-color: #27ae60; background: #eafaf1; color: #1e8449; font-weight: 600; }
+    .option.incorrect { border-color: #c0392b; background: #fdf2f2; color: #c0392b; }
+    .lettre { font-weight: 700; margin-right: 0.5rem; color: #999; }
+
+    .feedback { margin-top: 1rem; font-size: 1rem; font-weight: 500; color: #555; text-align: center; min-height: 1.5rem; }
+
+    .attente-debut { text-align: center; padding: 3rem 1rem; color: #777; }
+    .attente-debut h2 { font-size: 1.2rem; color: #333; margin-bottom: 0.5rem; }
+
+    .resultats { text-align: center; padding: 2rem 1rem; width: 100%; max-width: 600px; }
+    .resultats h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; }
+    .score-final { font-size: 3rem; font-weight: 700; color: #111; }
+    .classement { margin-top: 1.5rem; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .ligne-classement { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem 1.2rem; border-bottom: 1px solid #f0f0f0; }
+    .ligne-classement:last-child { border-bottom: none; }
+    .position { font-size: 1.1rem; margin-right: 0.8rem; }
+    .nom-classement { font-weight: 500; flex: 1; }
+    .score-classement { color: #666; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+
+  <div id="vue-attente" class="attente-debut">
+    <h2>La partie commence bientôt…</h2>
+    <p>Prépare-toi !</p>
+  </div>
+
+  <div id="vue-jeu" style="display:none; width:100%; max-width:600px; display:none; flex-direction:column; align-items:center">
+    <div class="entete">
+      <span class="nom-jeu" id="nom-jeu">—</span>
+      <span class="score" id="score-affiche">0 pts</span>
+    </div>
+    <div class="timer" id="timer">—</div>
+    <div class="carte-question">
+      <div class="mot" id="mot">—</div>
+      <div class="info-gram" id="info-gram"></div>
+      <div class="syntaxe" id="syntaxe"></div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div id="vue-resultats" class="resultats" style="display:none">
+    <h2>Partie terminée !</h2>
+    <div class="score-final" id="score-final">0 pts</div>
+    <div class="classement" id="classement"></div>
+  </div>
+
+  <script>
+    const joueur = JSON.parse(sessionStorage.getItem('joueur') || '{}');
+    const ws = new WebSocket(`ws://${window.location.host}`);
+
+    let score = 0;
+    let questionActuelle = null;
+    let aRepondu = false;
+    const LETTRES = ['A', 'B', 'C', 'D'];
+
+    document.getElementById('nom-jeu').textContent = joueur.nomJeu || '—';
+
+    ws.onopen = () => {
+      if (joueur.id) {
+        ws.send(JSON.stringify({ evenement: 'rejoindre', donnees: { id: joueur.id, nomJeu: joueur.nomJeu } }));
+      }
+      // Afficher la question mise en cache lors du redirect si disponible
+      const questionSauvegardee = sessionStorage.getItem('question');
+      if (questionSauvegardee) {
+        afficherQuestion(JSON.parse(questionSauvegardee));
+        sessionStorage.removeItem('question');
+      }
+    };
+
+    ws.onmessage = (e) => {
+      const { evenement, donnees } = JSON.parse(e.data);
+
+      if (evenement === 'question') {
+        afficherQuestion(donnees);
+      }
+
+      if (evenement === 'timer') {
+        const el = document.getElementById('timer');
+        el.textContent = donnees.secondes;
+        el.className = 'timer' + (donnees.secondes <= 5 ? ' urgence' : '');
+      }
+
+      if (evenement === 'fin_question') {
+        revelerReponse(donnees.indexCorrect);
+      }
+
+      if (evenement === 'partie_terminee') {
+        afficherResultats(donnees.classement);
+      }
+    };
+
+    function afficherQuestion(donnees) {
+      questionActuelle = donnees;
+      aRepondu = false;
+
+      document.getElementById('vue-attente').style.display = 'none';
+      document.getElementById('vue-jeu').style.display = 'flex';
+
+      const infos = [donnees.info.classe, donnees.info.genre !== 'non applicable' ? donnees.info.genre : null].filter(Boolean).join(' · ');
+      document.getElementById('mot').textContent = donnees.mot;
+      document.getElementById('info-gram').textContent = infos;
+      document.getElementById('syntaxe').textContent = donnees.info.syntaxe || '';
+      document.getElementById('feedback').textContent = '';
+
+      const container = document.getElementById('options');
+      container.innerHTML = donnees.options.map((opt, i) => `
+        <button class="option" onclick="repondre(${i})" id="opt-${i}">
+          <span class="lettre">${LETTRES[i]}</span>${opt.texte}
+        </button>`).join('');
+    }
+
+    function repondre(index) {
+      if (aRepondu || !questionActuelle) return;
+      aRepondu = true;
+
+      const tempsMs = questionActuelle.tempsDebut ? Date.now() - questionActuelle.tempsDebut : 0;
+      const correcte = questionActuelle.options[index].correcte;
+
+      document.querySelectorAll('.option').forEach(b => b.disabled = true);
+      document.getElementById(`opt-${index}`).classList.add(correcte ? 'correct' : 'incorrect');
+
+      if (correcte) {
+        const bonus = Math.round(500 + 500 * Math.max(0, 1 - tempsMs / 15000));
+        score += bonus;
+        document.getElementById('score-affiche').textContent = score + ' pts';
+        document.getElementById('feedback').textContent = '✓ Bonne réponse !';
+      } else {
+        document.getElementById('feedback').textContent = '✗ Mauvaise réponse.';
+      }
+
+      ws.send(JSON.stringify({
+        evenement: 'repondre',
+        donnees: { questionIndex: questionActuelle.index, optionChoisie: index, correcte, tempsMsReponse: tempsMs }
+      }));
+    }
+
+    function revelerReponse(indexCorrect) {
+      document.querySelectorAll('.option').forEach(b => b.disabled = true);
+      const btn = document.getElementById(`opt-${indexCorrect}`);
+      if (btn) btn.classList.add('correct');
+      if (!aRepondu) document.getElementById('feedback').textContent = 'Temps écoulé !';
+    }
+
+    function afficherResultats(classement) {
+      document.getElementById('vue-jeu').style.display = 'none';
+      document.getElementById('vue-resultats').style.display = 'block';
+      document.getElementById('score-final').textContent = score + ' pts';
+
+      const medailles = ['🥇', '🥈', '🥉'];
+      document.getElementById('classement').innerHTML = classement.map((j, i) => `
+        <div class="ligne-classement">
+          <span class="position">${medailles[i] || (i + 1) + '.'}</span>
+          <span class="nom-classement">${j.nomJeu}</span>
+          <span class="score-classement">${j.score} pts</span>
+        </div>`).join('');
+    }
+  </script>
+</body>
+</html>
