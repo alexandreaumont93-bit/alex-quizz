@@ -51,6 +51,39 @@ const PRESETS = [
   { type: 'traduction-contexte', nb_choix: 6, qualite: 'meme-classe', niveaux_mot: ['C2'],        niveaux_distract: ['C2'],       tempsSecondes:  7, seuil_cognate: 0.30 }, // 40
 ]
 
+// Progression CECR pour décaler d'un cran dans un sens ou l'autre
+const CECR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+function stepCecr(niveaux, d) {
+  if (!niveaux) return niveaux
+  return [...new Set(niveaux.map(c => CECR[Math.min(5, Math.max(0, CECR.indexOf(c) + d))]))]
+}
+
+// Pour chaque preset de base, génère 3 variantes de difficulté équivalente :
+//   "large"   — plus de choix, mot plus facile, plus de temps  (difficile à deviner parmi beaucoup)
+//   "serré"   — moins de choix, mot plus dur, moins de temps   (faut vraiment savoir le mot)
+//   "équilibré" — config de base
+function creerVariants(base) {
+  if (!base) return null
+  const sc = base.seuil_cognate ?? 1.0
+  return [
+    { ...base,
+      nb_choix:         Math.min(6, base.nb_choix + 2),
+      niveaux_mot:      stepCecr(base.niveaux_mot, -1),
+      niveaux_distract: stepCecr(base.niveaux_distract, -1),
+      tempsSecondes:    Math.min(25, base.tempsSecondes + 3),
+      seuil_cognate:    Math.min(1.0, sc + 0.10) },
+    { ...base,
+      nb_choix:         Math.max(2, base.nb_choix - 1),
+      niveaux_mot:      stepCecr(base.niveaux_mot, +1),
+      niveaux_distract: stepCecr(base.niveaux_distract, +1),
+      tempsSecondes:    Math.max(6, base.tempsSecondes - 2),
+      seuil_cognate:    Math.max(0.3, sc - 0.10) },
+    { ...base },
+  ]
+}
+
+const VARIANTS = PRESETS.map(creerVariants)
+
 const _cache = {}
 
 function chargerSource(source) {
@@ -64,7 +97,9 @@ function chargerSource(source) {
 function genererPourJoueur(joueur, source) {
   const { entrees, toutes } = chargerSource(source)
   const niveau = Math.min(40, Math.max(1, Math.round(joueur.niveau)))
-  const preset = PRESETS[niveau]
+  // Tirage aléatoire parmi les 3 variantes de ce niveau
+  const variants = VARIANTS[niveau]
+  const preset   = variants[Math.floor(Math.random() * variants.length)]
 
   const question = genererUne({
     entrees,
