@@ -37,8 +37,9 @@ function melanger(arr) {
   return a
 }
 
-function choisirDistracteurs(entree, toutes, nb, qualite, niveaux_distract) {
-  let pool = toutes.filter(e => e.traduction && e.traduction !== entree.traduction && e.mot !== entree.mot)
+function choisirDistracteurs(entree, toutes, nb, qualite, niveaux_distract, bonneReponse) {
+  const exclure = bonneReponse || entree.traduction
+  let pool = toutes.filter(e => e.traduction && e.traduction !== exclure && e.mot !== entree.mot)
 
   // Filtrer les distracteurs par niveau CECR si précisé
   if (niveaux_distract && niveaux_distract.length > 0) {
@@ -57,29 +58,39 @@ function choisirDistracteurs(entree, toutes, nb, qualite, niveaux_distract) {
   return melanger(pool).slice(0, nb).map(e => e.traduction)
 }
 
-function fabriquer(entree, toutes, type, nb_choix, qualite, niveaux_distract) {
+function choisirTraduction(entree, seuil_cognate) {
+  // Si on a des alternatives non-cognates ET que le niveau l'exige, on en choisit une
+  if (seuil_cognate < 0.9 && entree.alt_en && entree.alt_en.length > 0) {
+    return entree.alt_en[Math.floor(Math.random() * entree.alt_en.length)]
+  }
+  return entree.traduction
+}
+
+function fabriquer(entree, toutes, type, nb_choix, qualite, niveaux_distract, seuil_cognate) {
   if (type === 'traduction-base') {
     if (!entree.traduction) return null
-    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite, niveaux_distract)
+    const traduction = choisirTraduction(entree, seuil_cognate)
+    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite, niveaux_distract, traduction)
     if (dist.length < nb_choix - 1) return null
     return {
       mot: entree.mot,
       contexte: null,
       options: melanger([
-        { texte: entree.traduction, correcte: true },
+        { texte: traduction, correcte: true },
         ...dist.map(d => ({ texte: d, correcte: false })),
       ]),
     }
   }
   if (type === 'traduction-contexte') {
     if (!entree.traduction || !entree.exemple) return null
-    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite, niveaux_distract)
+    const traduction = choisirTraduction(entree, seuil_cognate)
+    const dist = choisirDistracteurs(entree, toutes, nb_choix - 1, qualite, niveaux_distract, traduction)
     if (dist.length < nb_choix - 1) return null
     return {
       mot: entree.mot,
       contexte: entree.exemple,
       options: melanger([
-        { texte: entree.traduction, correcte: true },
+        { texte: traduction, correcte: true },
         ...dist.map(d => ({ texte: d, correcte: false })),
       ]),
     }
@@ -135,7 +146,7 @@ function genererUne({ entrees, toutes, type, nb_choix, qualite, source, exclure 
 
   for (const entree of melanger(pool)) {
     const nbEff    = type.startsWith('genre') ? parseInt(type.slice(-1)) : nb_choix
-    const resultat = fabriquer(entree, toutes, type, nbEff, qualite, niveaux_distract)
+    const resultat = fabriquer(entree, toutes, type, nbEff, qualite, niveaux_distract, seuil_cognate)
     if (!resultat) continue
 
     return {

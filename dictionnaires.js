@@ -15,6 +15,7 @@ const CHAMPS = {
   thème:       ['thème', 'theme', 'topic'],
   note:        ["note d'usage", 'note', 'usage'],
   exemple:     ['exemple en contexte', 'exemple', 'example', 'contexte'],
+  alt_en:      ['alt en', 'alt_en', 'alternatives en'],
 }
 
 function normaliserNature(raw) {
@@ -67,6 +68,9 @@ function parserCSV(contenu) {
     const mot     = matchArticle ? matchArticle[2].trim() : motBrut
     const article = get(cols, 'article') || (matchArticle ? matchArticle[1].toLowerCase() : '')
 
+    const altRaw = get(cols, 'alt_en')
+    const alt_en = altRaw ? altRaw.split('|').map(s => s.trim()).filter(Boolean) : []
+
     return {
       mot,
       article,
@@ -75,6 +79,7 @@ function parserCSV(contenu) {
       niveau_cecr: get(cols, 'niveau_cecr'),
       définition:  get(cols, 'définition'),
       traduction:  get(cols, 'traduction'),
+      alt_en,
       thème:       get(cols, 'thème'),
       note:        get(cols, 'note'),
       exemple:     get(cols, 'exemple'),
