@@ -38,11 +38,14 @@
 
     /* ── Options ── */
     .options { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; width: 100%; max-width: 600px; }
+    .options.col-1 { grid-template-columns: 1fr; }
+    .options.col-3 { grid-template-columns: 1fr 1fr 1fr; }
     .option { background: white; border: 2px solid #e0e0e0; border-radius: 12px; padding: 0.85rem 1rem; font-size: 0.95rem; cursor: pointer; text-align: left; transition: border-color 0.12s, background 0.12s; }
     .option:hover:not(:disabled) { border-color: #bbb; }
     .option:disabled { cursor: default; }
     .option.correct { border-color: #27ae60; background: #eafaf1; color: #1e8449; font-weight: 600; }
     .option.incorrect { border-color: #c0392b; background: #fdf2f2; color: #c0392b; }
+    .option.plein-largeur { grid-column: 1 / -1; }
     .lettre { font-weight: 700; margin-right: 0.5rem; color: #ccc; }
 
     /* ── Feedback ── */
@@ -112,7 +115,7 @@
   const joueur   = JSON.parse(sessionStorage.getItem('joueur') || '{}')
   const proto    = window.location.protocol === 'https:' ? 'wss' : 'ws'
   const ws       = new WebSocket(`${proto}://${window.location.host}`)
-  const LETTRES  = ['A', 'B', 'C', 'D']
+  const LETTRES  = ['A', 'B', 'C', 'D', 'E', 'F']
 
   let score            = 0
   let niveau           = 3
@@ -203,10 +206,14 @@
     document.getElementById('feedback').className = 'feedback'
 
     const container = document.getElementById('options')
-    container.innerHTML = donnees.options.map((opt, i) => `
-      <button class="option" onclick="repondre(${i})" id="opt-${i}">
+    const nb = donnees.options.length
+    container.className = 'options' + (nb === 6 ? ' col-3' : nb <= 3 ? ' col-1' : '')
+    container.innerHTML = donnees.options.map((opt, i) => {
+      const seul = nb === 5 && i === 4
+      return `<button class="option${seul ? ' plein-largeur' : ''}" onclick="repondre(${i})" id="opt-${i}">
         <span class="lettre">${LETTRES[i]}</span>${opt.texte}
-      </button>`).join('')
+      </button>`
+    }).join('')
 
     if (donnees.tempsSecondes) demarrerTimerQuestion(donnees.tempsSecondes)
   }
