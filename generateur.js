@@ -49,7 +49,7 @@ function genererConfig(niveau) {
   const r = Math.random()
   let type
   if (p < 0.50 && r < 0.15) {
-    type = p < 0.25 ? 'genre-2' : 'genre-4'
+    type = 'genre-2'
   } else if (r < 0.18) {
     type = 'conjugaison'
   } else {
