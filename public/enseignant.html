@@ -93,6 +93,11 @@
     <h1>Alex.ex — Quiz adaptatif</h1>
     <p class="sous-titre">Chaque apprenant progresse à son rythme.</p>
     <div class="section">
+      <div class="lien-bloc" style="margin-bottom:1.25rem">
+        <span class="lien-label">Lien apprenants</span>
+        <span class="lien-url" id="lien-url-accueil"></span>
+        <button class="btn-copier" id="btn-copier-accueil" onclick="copierLienAccueil()">Copier</button>
+      </div>
       <button class="btn btn-principal" onclick="allerConfig()">Nouvelle partie →</button>
       <div style="margin-top:1.25rem" id="section-connectes" style="display:none">
         <p class="connectes-titre">Apprenants connectés</p>
@@ -222,10 +227,10 @@
       document.getElementById('nb-total').textContent = donnees.joueurs.length
       majCartes()
       fetch('/api/infos').then(r => r.json()).then(({ url }) => {
-        document.getElementById('lien-url').textContent = url
+        document.getElementById('lien-url').textContent = url + '/rejoindre.html'
         document.getElementById('lien-bloc').style.display = 'flex'
       }).catch(() => {
-        document.getElementById('lien-url').textContent = window.location.origin
+        document.getElementById('lien-url').textContent = window.location.origin + '/rejoindre.html'
         document.getElementById('lien-bloc').style.display = 'flex'
       })
     }
@@ -357,14 +362,26 @@
       </tr>`).join('')
   }
 
-  function copierLien() {
-    const url = document.getElementById('lien-url').textContent
+  function _copier(url, btn) {
     navigator.clipboard.writeText(url).then(() => {
-      const btn = document.getElementById('btn-copier')
       btn.textContent = 'Copié !'; btn.classList.add('copie')
       setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copie') }, 2000)
     })
   }
+
+  function copierLien() {
+    _copier(document.getElementById('lien-url').textContent, document.getElementById('btn-copier'))
+  }
+
+  function copierLienAccueil() {
+    _copier(document.getElementById('lien-url-accueil').textContent, document.getElementById('btn-copier-accueil'))
+  }
+
+  fetch('/api/infos').then(r => r.json()).then(({ url }) => {
+    document.getElementById('lien-url-accueil').textContent = url + '/rejoindre.html'
+  }).catch(() => {
+    document.getElementById('lien-url-accueil').textContent = window.location.origin + '/rejoindre.html'
+  })
 
   const ecrans = ['ecran-accueil', 'ecran-config', 'ecran-lobby', 'ecran-jeu', 'ecran-resultats']
   function afficher(id) {
