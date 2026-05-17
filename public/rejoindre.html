@@ -155,12 +155,25 @@
   <script>
     const LETTRES = ['A', 'B', 'C', 'D', 'E', 'F'];
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${proto}://${window.location.host}`);
     let score = 0;
     let questionActuelle = null;
     let aRepondu = false;
     let nomJeuLocal = '';
     let idApprenant = '';
+    let ws = null;
+    let reconnectTimer = null;
+
+    function connecterWS() {
+      if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+      ws = new WebSocket(`${proto}://${window.location.host}`);
+      ws.onopen    = onWsOpen;
+      ws.onmessage = onWsMessage;
+      ws.onclose   = () => {
+        if (reconnectTimer) clearTimeout(reconnectTimer);
+        reconnectTimer = setTimeout(connecterWS, 2500);
+      };
+    }
+    connecterWS();
 
     // ── Audio ───────────────────────────────────────────────────────
     let audioCtx = null;
@@ -218,19 +231,19 @@
     }
 
     // ── WebSocket ──────────────────────────────────────────────────
-    ws.onopen = () => {
+    function onWsOpen() {
       const savedId  = localStorage.getItem('quiz_id');
       const savedNom = localStorage.getItem('quiz_nomJeu');
       if (savedId && savedNom) {
         idApprenant = savedId;
         nomJeuLocal = savedNom;
-        ws.send(JSON.stringify({ evenement: 'rejoindre', donnees: { id: savedId, nomJeu: savedNom } }));
+        (ws && ws.readyState === WebSocket.OPEN) && ws.send(JSON.stringify({ evenement: 'rejoindre', donnees: { id: savedId, nomJeu: savedNom } }));
       } else {
-        ws.send(JSON.stringify({ evenement: 'demander_apprenants' }));
+        (ws && ws.readyState === WebSocket.OPEN) && ws.send(JSON.stringify({ evenement: 'demander_apprenants' }));
       }
-    };
+    }
 
-    ws.onmessage = (e) => {
+    function onWsMessage(e) {
       const { evenement, donnees } = JSON.parse(e.data);
 
       if (evenement === 'apprenants_disponibles') {
@@ -316,7 +329,7 @@
       if (evenement === 'partie_terminee') {
         afficherResultats(donnees.classement);
       }
-    };
+    }
 
     // ── UI ─────────────────────────────────────────────────────────
     function continuer() {
@@ -332,7 +345,7 @@
       const nomJeu = document.getElementById('nomJeu').value.trim();
       document.getElementById('erreur2').textContent = '';
       if (!nomJeu) { document.getElementById('erreur2').textContent = 'Entre ton nom de jeu.'; return; }
-      ws.send(JSON.stringify({ evenement: 'rejoindre', donnees: { id: idApprenant, nomJeu } }));
+      (ws && ws.readyState === WebSocket.OPEN) && ws.send(JSON.stringify({ evenement: 'rejoindre', donnees: { id: idApprenant, nomJeu } }));
     }
 
     function majTagsJoueurs(joueurs) {
@@ -399,7 +412,7 @@
         sonErreur();
         document.getElementById('feedback').textContent = '✗ Mauvaise réponse.';
       }
-      ws.send(JSON.stringify({ evenement: 'repondre', donnees: { questionIndex: questionActuelle.index, optionChoisie: index, correcte, tempsMsReponse: tempsMs } }));
+      (ws && ws.readyState === WebSocket.OPEN) && ws.send(JSON.stringify({ evenement: 'repondre', donnees: { questionIndex: questionActuelle.index, optionChoisie: index, correcte, tempsMsReponse: tempsMs } }));
     }
 
     function revelerReponse(indexCorrect) {
