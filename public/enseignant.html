@@ -3,54 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Enseignant — Quiz</title>
+  <title>Enseignant — Alex.ex</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #f0f0f0; min-height: 100vh; padding: 2rem; }
-    h1 { font-size: 1.3rem; font-weight: 600; color: #111; margin-bottom: 1.5rem; }
-    h2 { font-size: 1rem; font-weight: 600; color: #333; margin-bottom: 1rem; }
-    .section { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-    label { display: block; font-size: 0.8rem; font-weight: 500; color: #555; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: white; }
-    .slots { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
-    .slot { background: #f8f8f8; border: 1px solid #e0e0e0; border-radius: 10px; padding: 1rem; min-width: 160px; flex: 1; }
-    .slot label { margin-bottom: 0.4rem; }
-    .slot select { width: 100%; }
-    .slot .statut { margin-top: 0.5rem; font-size: 0.8rem; color: #999; }
-    .slot.connecte { border-color: #27ae60; background: #f0faf4; }
-    .slot.connecte .statut { color: #27ae60; font-weight: 500; }
-    .btn { padding: 0.65rem 1.2rem; border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; }
+
+    h1 { font-size: 1.25rem; font-weight: 700; color: #111; margin-bottom: 0.25rem; }
+    .sous-titre { font-size: 0.85rem; color: #888; margin-bottom: 1.75rem; }
+    .section { background: white; border-radius: 14px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .btn { padding: 0.65rem 1.25rem; border: none; border-radius: 9px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.15s; }
     .btn-principal { background: #111; color: white; }
     .btn-principal:hover { background: #333; }
     .btn-principal:disabled { background: #ccc; cursor: default; }
-    .btn-secondaire { background: #eee; color: #333; }
+    .btn-secondaire { background: #eee; color: #444; }
     .btn-secondaire:hover { background: #ddd; }
-    .rangee { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.78rem; font-weight: 500; }
-    .badge-attente { background: #f0f0f0; color: #888; }
-    .badge-ok { background: #eafaf1; color: #27ae60; }
-    .lien-bloc { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.25rem; }
-    .lien-url { font-family: monospace; font-size: 0.95rem; color: #111; background: #f4f4f4; border-radius: 6px; padding: 0.35rem 0.6rem; }
-    .btn-copier { padding: 0.35rem 0.75rem; background: #eee; border: none; border-radius: 6px; font-size: 0.82rem; cursor: pointer; color: #333; }
+
+    /* ── Écran 1 : Choix du jeu ── */
+    #ecran-jeux { max-width: 820px; }
+    .grille-jeux { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .carte-jeu { background: white; border: 2px solid #e8e8e8; border-radius: 14px; padding: 1.4rem; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; position: relative; }
+    .carte-jeu:hover:not(.bientot) { border-color: #111; box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .carte-jeu.bientot { opacity: 0.45; cursor: default; }
+    .carte-jeu .icone { font-size: 2rem; margin-bottom: 0.75rem; }
+    .carte-jeu .nom-jeu { font-size: 1rem; font-weight: 600; color: #111; margin-bottom: 0.3rem; }
+    .carte-jeu .desc-jeu { font-size: 0.82rem; color: #777; line-height: 1.4; }
+    .badge-bientot { position: absolute; top: 0.75rem; right: 0.75rem; background: #f0f0f0; color: #999; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    /* ── Écran 2 : Config ── */
+    #ecran-config { max-width: 600px; }
+    .retour { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #888; cursor: pointer; margin-bottom: 1.25rem; background: none; border: none; padding: 0; }
+    .retour:hover { color: #333; }
+    label { display: block; font-size: 0.78rem; font-weight: 600; color: #666; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: white; }
+    .rangee { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .champ { display: flex; flex-direction: column; }
+    .apprenants-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
+    .case-apprenant { background: #f8f8f8; border: 2px solid #e0e0e0; border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.6rem; transition: border-color 0.15s, background 0.15s; user-select: none; }
+    .case-apprenant:hover { border-color: #aaa; }
+    .case-apprenant.selectionne { border-color: #111; background: #f0f0f0; }
+    .case-apprenant .check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #ccc; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: transparent; }
+    .case-apprenant.selectionne .check { border-color: #111; background: #111; color: white; }
+    .case-apprenant .nom-apprenant { font-size: 0.9rem; font-weight: 500; color: #222; }
+
+    /* ── Écran 3 : Lobby ── */
+    #ecran-lobby { max-width: 600px; }
+    .lobby-entete { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.25rem; }
+    .compteur { font-size: 0.85rem; color: #888; white-space: nowrap; }
+    .compteur span { font-weight: 700; color: #111; }
+    .cartes-joueurs { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .carte-joueur { background: #f8f8f8; border: 2px solid #e0e0e0; border-radius: 12px; padding: 1rem; transition: border-color 0.3s, background 0.3s; }
+    .carte-joueur.connecte { border-color: #27ae60; background: #f0faf4; }
+    .carte-joueur .nom-reel { font-size: 0.75rem; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
+    .statut-ligne { display: flex; align-items: center; gap: 0.5rem; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #ddd; flex-shrink: 0; }
+    .carte-joueur.connecte .dot { background: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); }
+    .nom-jeu-badge { font-size: 0.9rem; font-weight: 600; color: #111; }
+    .statut-texte { font-size: 0.85rem; color: #bbb; font-style: italic; }
+    .lien-bloc { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; padding: 0.9rem 1rem; background: #f8f8f8; border-radius: 10px; margin-bottom: 1.25rem; }
+    .lien-label { font-size: 0.8rem; color: #888; font-weight: 500; white-space: nowrap; }
+    .lien-url { font-family: monospace; font-size: 0.9rem; color: #111; font-weight: 600; }
+    .btn-copier { padding: 0.3rem 0.7rem; background: #eee; border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer; color: #444; white-space: nowrap; }
     .btn-copier:hover { background: #ddd; }
     .btn-copier.copie { background: #eafaf1; color: #27ae60; }
+    .lancer-rangee { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .msg-attente { font-size: 0.85rem; color: #999; }
+    .msg-attente.pret { color: #27ae60; font-weight: 500; }
 
-    /* Dashboard en jeu */
+    /* ── Écran 4 : En jeu ── */
+    #ecran-jeu { max-width: 600px; }
+    .timer { font-size: 3rem; font-weight: 700; color: #111; text-align: center; padding: 0.5rem 0; }
     .question-box { background: #f8f8f8; border-radius: 10px; padding: 1.2rem; margin-bottom: 1rem; }
     .question-mot { font-size: 2rem; font-weight: 700; color: #111; }
     .question-info { font-size: 0.85rem; color: #777; margin-top: 0.3rem; }
-    .joueur-ligne { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #f0f0f0; }
-    .joueur-ligne:last-child { border-bottom: none; }
+    .joueurs-jeu { display: flex; flex-direction: column; gap: 0.5rem; }
+    .joueur-ligne { display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 0.75rem; background: #f8f8f8; border-radius: 8px; }
     .joueur-nom { font-weight: 500; color: #222; }
     .joueur-score { font-size: 0.85rem; color: #666; }
     .reponse-ok { color: #27ae60; font-weight: 600; }
     .reponse-non { color: #c0392b; }
-    .timer { font-size: 2.5rem; font-weight: 700; color: #111; text-align: center; padding: 0.5rem 0; }
 
-    /* Podium */
+    /* ── Écran 5 : Résultats ── */
+    #ecran-resultats { max-width: 500px; }
     .podium { display: flex; align-items: flex-end; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
     .podium-place { text-align: center; }
-    .podium-barre { background: #ddd; border-radius: 6px 6px 0 0; width: 80px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.5rem; font-size: 1.5rem; }
+    .podium-barre { border-radius: 6px 6px 0 0; width: 90px; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 0.5rem; font-size: 1.5rem; }
     .podium-barre.p1 { height: 120px; background: #f1c40f; }
     .podium-barre.p2 { height: 85px; background: #bdc3c7; }
     .podium-barre.p3 { height: 60px; background: #cd7f32; }
@@ -60,26 +96,39 @@
 </head>
 <body>
 
-  <!-- SECTION : Configuration -->
-  <div id="section-config">
+  <!-- ÉCRAN 1 : Choix du jeu -->
+  <div id="ecran-jeux">
+    <h1>Choisir un jeu</h1>
+    <p class="sous-titre">Sélectionne le type de jeu pour commencer une session.</p>
+    <div class="grille-jeux">
+      <div class="carte-jeu" onclick="choisirJeu('quiz')">
+        <div class="icone">🧠</div>
+        <div class="nom-jeu">Quiz vocabulaire</div>
+        <div class="desc-jeu">Traduis les mots du texte — 4 choix de réponses, score selon la vitesse.</div>
+      </div>
+      <div class="carte-jeu bientot">
+        <div class="badge-bientot">Bientôt</div>
+        <div class="icone">🔤</div>
+        <div class="nom-jeu">Épellation</div>
+        <div class="desc-jeu">Écoute et écris le mot correctement.</div>
+      </div>
+      <div class="carte-jeu bientot">
+        <div class="badge-bientot">Bientôt</div>
+        <div class="icone">🃏</div>
+        <div class="nom-jeu">Mémoire</div>
+        <div class="desc-jeu">Associe les mots français à leur traduction.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ÉCRAN 2 : Configuration -->
+  <div id="ecran-config" style="display:none">
+    <button class="retour" onclick="retourJeux()">← Retour</button>
     <div class="section">
-      <h1>Configurer la partie</h1>
+      <h1 id="titre-config">Quiz vocabulaire</h1>
+      <p class="sous-titre">Configure la session avant de la créer.</p>
       <div class="rangee">
-        <div>
-          <label>Nombre de joueurs</label>
-          <select id="nbJoueurs" onchange="mettreAJourSlots()">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3" selected>3</option>
-          </select>
-        </div>
-        <div>
-          <label>Type de jeu</label>
-          <select id="typeJeu">
-            <option value="quiz">Quiz</option>
-          </select>
-        </div>
-        <div>
+        <div class="champ">
           <label>Questions</label>
           <select id="nbQuestions">
             <option value="5">5</option>
@@ -89,58 +138,64 @@
           </select>
         </div>
       </div>
-    </div>
-
-    <div class="section">
-      <h2>Joueurs</h2>
-      <div class="slots" id="slots"></div>
-      <div style="margin-top:1.2rem">
-        <button class="btn btn-principal" id="btn-creer" onclick="creerSession()">Créer la session</button>
-      </div>
+      <label style="margin-bottom:0.6rem">Apprenants</label>
+      <div class="apprenants-grille" id="grille-apprenants"></div>
+      <button class="btn btn-principal" id="btn-creer" onclick="creerSession()" disabled>Créer la session</button>
     </div>
   </div>
 
-  <!-- SECTION : Lobby -->
-  <div id="section-lobby" style="display:none">
+  <!-- ÉCRAN 3 : Lobby -->
+  <div id="ecran-lobby" style="display:none">
     <div class="section">
-      <h2>Session en attente</h2>
-      <div id="liste-joueurs-lobby"></div>
-      <div style="margin-top:1.2rem">
-        <button class="btn btn-principal" id="btn-lancer" onclick="lancerJeu()" disabled>Lancer la partie</button>
-        <div class="lien-bloc" id="lien-info" style="display:none">
-          <span style="font-size:0.85rem;color:#777">Lien apprenants :</span>
-          <span class="lien-url" id="lien-url"></span>
-          <button class="btn-copier" id="btn-copier" onclick="copierLien()">Copier</button>
+      <div class="lobby-entete">
+        <div>
+          <h1>En attente des apprenants</h1>
+          <p class="sous-titre" style="margin-bottom:0">Partage le lien — lance quand tout le monde est prêt.</p>
         </div>
+        <div class="compteur"><span id="nb-connectes">0</span> / <span id="nb-total">0</span> connectés</div>
+      </div>
+      <div class="lien-bloc" id="lien-bloc" style="display:none">
+        <span class="lien-label">Lien apprenants</span>
+        <span class="lien-url" id="lien-url"></span>
+        <button class="btn-copier" id="btn-copier" onclick="copierLien()">Copier</button>
+      </div>
+      <div class="cartes-joueurs" id="cartes-joueurs"></div>
+      <div class="lancer-rangee">
+        <button class="btn btn-principal" id="btn-lancer" onclick="lancerJeu()" disabled>Lancer la partie</button>
+        <span class="msg-attente" id="msg-attente">En attente de tous les apprenants…</span>
       </div>
     </div>
   </div>
 
-  <!-- SECTION : En jeu -->
-  <div id="section-jeu" style="display:none">
+  <!-- ÉCRAN 4 : En jeu -->
+  <div id="ecran-jeu" style="display:none">
     <div class="section">
       <div class="timer" id="timer">—</div>
       <div class="question-box" id="question-courante"></div>
     </div>
     <div class="section">
-      <h2>Joueurs</h2>
-      <div id="liste-joueurs-jeu"></div>
+      <h1 style="margin-bottom:1rem">Apprenants</h1>
+      <div class="joueurs-jeu" id="joueurs-jeu"></div>
     </div>
   </div>
 
-  <!-- SECTION : Résultats -->
-  <div id="section-resultats" style="display:none">
+  <!-- ÉCRAN 5 : Résultats -->
+  <div id="ecran-resultats" style="display:none">
     <div class="section">
       <h1>Résultats</h1>
       <div class="podium" id="podium"></div>
-      <div id="stats-detaillees" style="margin-top:1.5rem"></div>
+      <div id="stats-detaillees"></div>
+      <button class="btn btn-secondaire" style="margin-top:1.5rem" onclick="retourJeux()">Nouvelle partie</button>
     </div>
   </div>
 
   <script>
     const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const ws = new WebSocket(`${proto}://${window.location.host}`);
+
     let apprenants = [];
+    let selection = new Set();
+    let typeJeuChoisi = null;
     let joueursDashboard = {};
 
     ws.onopen = () => ws.send(JSON.stringify({ evenement: 'teacher_connecte' }));
@@ -150,19 +205,21 @@
 
       if (evenement === 'apprenants_disponibles') {
         apprenants = donnees.apprenants;
-        mettreAJourSlots();
+        construireGrilleApprenants();
       }
 
       if (evenement === 'session_creee') {
         joueursDashboard = {};
-        donnees.joueurs.forEach(j => joueursDashboard[j.id] = { ...j, nomJeu: '—', repondu: false, correcte: null, score: 0 });
+        donnees.joueurs.forEach(j => {
+          joueursDashboard[j.id] = { ...j, nomJeu: null, connecte: false, repondu: false, correcte: null, score: 0 };
+        });
         afficherLobby();
         fetch('/api/infos').then(r => r.json()).then(({ url }) => {
           document.getElementById('lien-url').textContent = url;
-          document.getElementById('lien-info').style.display = 'flex';
+          document.getElementById('lien-bloc').style.display = 'flex';
         }).catch(() => {
           document.getElementById('lien-url').textContent = window.location.origin;
-          document.getElementById('lien-info').style.display = 'flex';
+          document.getElementById('lien-bloc').style.display = 'flex';
         });
       }
 
@@ -171,22 +228,20 @@
           joueursDashboard[donnees.id].nomJeu = donnees.nomJeu;
           joueursDashboard[donnees.id].connecte = true;
         }
-        rafraichirLobby();
+        majCartes();
+        majCompteur();
       }
 
       if (evenement === 'tous_connectes') {
         document.getElementById('btn-lancer').disabled = false;
-      }
-
-      if (evenement === 'statut') {
-        document.getElementById('timer').textContent = '⏳';
-        document.getElementById('question-courante').innerHTML =
-          `<div style="text-align:center;color:#777;font-size:1rem">${donnees.message}</div>`;
+        const msg = document.getElementById('msg-attente');
+        msg.textContent = 'Tout le monde est là — tu peux lancer !';
+        msg.classList.add('pret');
       }
 
       if (evenement === 'question') {
-        afficherSectionJeu(donnees);
-        reinitialiserReponses();
+        afficherQuestion(donnees);
+        reinitReponses();
       }
 
       if (evenement === 'timer') {
@@ -200,7 +255,7 @@
           joueur.correcte = donnees.correcte;
           if (donnees.score !== undefined) joueur.score = donnees.score;
         }
-        rafraichirJoueursDashboard();
+        majJoueursDashboard();
       }
 
       if (evenement === 'partie_terminee') {
@@ -208,85 +263,104 @@
       }
     };
 
-    function mettreAJourSlots() {
-      const n = parseInt(document.getElementById('nbJoueurs').value);
-      const container = document.getElementById('slots');
-      container.innerHTML = '';
-      for (let i = 0; i < n; i++) {
-        const options = apprenants.map(a => `<option value="${a.id}">${a.nom}</option>`).join('');
-        container.innerHTML += `
-          <div class="slot" id="slot-${i}">
-            <label>Joueur ${i + 1}</label>
-            <select id="slot-select-${i}">${options}</select>
-            <div class="statut" id="slot-statut-${i}">En attente…</div>
-          </div>`;
+    function choisirJeu(type) {
+      typeJeuChoisi = type;
+      afficher('ecran-config');
+    }
+
+    function retourJeux() {
+      selection.clear();
+      construireGrilleApprenants();
+      afficher('ecran-jeux');
+    }
+
+    function construireGrilleApprenants() {
+      const grille = document.getElementById('grille-apprenants');
+      if (!grille) return;
+      grille.innerHTML = apprenants.map(a => `
+        <div class="case-apprenant" id="case-${a.id}" onclick="toggleApprenant('${a.id}')">
+          <div class="check" id="check-${a.id}">✓</div>
+          <span class="nom-apprenant">${a.nom}</span>
+        </div>`).join('');
+      document.getElementById('btn-creer').disabled = true;
+    }
+
+    function toggleApprenant(id) {
+      if (selection.has(id)) {
+        selection.delete(id);
+        document.getElementById(`case-${id}`).classList.remove('selectionne');
+      } else {
+        selection.add(id);
+        document.getElementById(`case-${id}`).classList.add('selectionne');
       }
+      document.getElementById('btn-creer').disabled = selection.size === 0;
     }
 
     function creerSession() {
-      const n = parseInt(document.getElementById('nbJoueurs').value);
-      const slots = [];
-      for (let i = 0; i < n; i++) slots.push(document.getElementById(`slot-select-${i}`).value);
-      const typeJeu = document.getElementById('typeJeu').value;
       const nbQuestions = parseInt(document.getElementById('nbQuestions').value);
       sessionStorage.setItem('nbQuestions', nbQuestions);
-      ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots, typeJeu } }));
+      ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: [...selection], typeJeu: typeJeuChoisi } }));
     }
 
     function afficherLobby() {
-      document.getElementById('section-config').style.display = 'none';
-      document.getElementById('section-lobby').style.display = 'block';
-      rafraichirLobby();
+      afficher('ecran-lobby');
+      document.getElementById('nb-total').textContent = Object.keys(joueursDashboard).length;
+      majCartes();
+      majCompteur();
     }
 
-    function rafraichirLobby() {
-      const container = document.getElementById('liste-joueurs-lobby');
-      container.innerHTML = Object.values(joueursDashboard).map(j => `
-        <div class="joueur-ligne">
-          <span class="joueur-nom">${j.nomReel}</span>
-          <span class="badge ${j.connecte ? 'badge-ok' : 'badge-attente'}">
-            ${j.connecte ? j.nomJeu + ' ✓' : 'En attente…'}
-          </span>
+    function majCartes() {
+      document.getElementById('cartes-joueurs').innerHTML = Object.values(joueursDashboard).map(j => `
+        <div class="carte-joueur ${j.connecte ? 'connecte' : ''}">
+          <div class="nom-reel">${j.nomReel}</div>
+          <div class="statut-ligne">
+            <div class="dot"></div>
+            ${j.connecte
+              ? `<span class="nom-jeu-badge">${j.nomJeu}</span>`
+              : `<span class="statut-texte">En attente…</span>`}
+          </div>
         </div>`).join('');
+    }
+
+    function majCompteur() {
+      document.getElementById('nb-connectes').textContent =
+        Object.values(joueursDashboard).filter(j => j.connecte).length;
+    }
+
+    function lancerJeu() {
+      const nbQuestions = parseInt(sessionStorage.getItem('nbQuestions') || '10');
+      ws.send(JSON.stringify({ evenement: 'lancer_jeu', donnees: { nbQuestions } }));
+      afficher('ecran-jeu');
     }
 
     function copierLien() {
       const url = document.getElementById('lien-url').textContent;
       navigator.clipboard.writeText(url).then(() => {
         const btn = document.getElementById('btn-copier');
-        btn.textContent = 'Copié !';
-        btn.classList.add('copie');
+        btn.textContent = 'Copié !'; btn.classList.add('copie');
         setTimeout(() => { btn.textContent = 'Copier'; btn.classList.remove('copie'); }, 2000);
       });
     }
 
-    function lancerJeu() {
-      const nbQuestions = parseInt(sessionStorage.getItem('nbQuestions') || '10');
-      ws.send(JSON.stringify({ evenement: 'lancer_jeu', donnees: { nbQuestions } }));
-      document.getElementById('section-lobby').style.display = 'none';
-      document.getElementById('section-jeu').style.display = 'block';
-    }
-
-    function afficherSectionJeu(question) {
-      const box = document.getElementById('question-courante');
-      const infos = [question.info.classe, question.info.genre !== 'non applicable' ? question.info.genre : null].filter(Boolean).join(' · ');
-      box.innerHTML = `
-        <div class="question-mot">${question.mot}</div>
+    function afficherQuestion(q) {
+      afficher('ecran-jeu');
+      const infos = [q.info.classe, q.info.genre !== 'non applicable' ? q.info.genre : null].filter(Boolean).join(' · ');
+      document.getElementById('question-courante').innerHTML = `
+        <div class="question-mot">${q.mot}</div>
         <div class="question-info">${infos}</div>
-        <div class="question-info" style="margin-top:0.4rem;font-style:italic">${question.info.syntaxe || ''}</div>`;
-      rafraichirJoueursDashboard();
+        <div class="question-info" style="font-style:italic;margin-top:0.2rem">${q.info.syntaxe || ''}</div>`;
+      majJoueursDashboard();
     }
 
-    function reinitialiserReponses() {
+    function reinitReponses() {
       Object.values(joueursDashboard).forEach(j => { j.repondu = false; j.correcte = null; });
-      rafraichirJoueursDashboard();
+      majJoueursDashboard();
     }
 
-    function rafraichirJoueursDashboard() {
-      const container = document.getElementById('liste-joueurs-jeu');
-      container.innerHTML = Object.values(joueursDashboard).map(j => `
+    function majJoueursDashboard() {
+      document.getElementById('joueurs-jeu').innerHTML = Object.values(joueursDashboard).map(j => `
         <div class="joueur-ligne">
-          <span class="joueur-nom">${j.nomJeu}</span>
+          <span class="joueur-nom">${j.nomJeu || j.nomReel}</span>
           <span class="${j.repondu ? (j.correcte ? 'reponse-ok' : 'reponse-non') : ''}">
             ${j.repondu ? (j.correcte ? '✓ Correct' : '✗ Raté') : '…'}
           </span>
@@ -295,18 +369,21 @@
     }
 
     function afficherResultats(classement) {
-      document.getElementById('section-jeu').style.display = 'none';
-      document.getElementById('section-resultats').style.display = 'block';
-      const podium = document.getElementById('podium');
+      afficher('ecran-resultats');
       const ordre = [classement[1], classement[0], classement[2]].filter(Boolean);
       const classes = ['p2', 'p1', 'p3'];
       const medailles = ['🥈', '🥇', '🥉'];
-      podium.innerHTML = ordre.map((j, i) => `
+      document.getElementById('podium').innerHTML = ordre.map((j, i) => `
         <div class="podium-place">
           <div class="podium-barre ${classes[i]}">${medailles[i]}</div>
           <div class="podium-nom">${j.nomJeu}</div>
           <div class="podium-score">${j.score} pts</div>
         </div>`).join('');
+    }
+
+    const ecrans = ['ecran-jeux', 'ecran-config', 'ecran-lobby', 'ecran-jeu', 'ecran-resultats'];
+    function afficher(id) {
+      ecrans.forEach(e => document.getElementById(e).style.display = e === id ? 'block' : 'none');
     }
   </script>
 </body>
