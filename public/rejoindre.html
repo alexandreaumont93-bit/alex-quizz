@@ -131,7 +131,17 @@
     let nomJeuLocal = '';
     let idApprenant = '';
 
-    ws.onopen = () => ws.send(JSON.stringify({ evenement: 'demander_apprenants' }));
+    ws.onopen = () => {
+      const savedId  = localStorage.getItem('quiz_id');
+      const savedNom = localStorage.getItem('quiz_nomJeu');
+      if (savedId && savedNom) {
+        idApprenant = savedId;
+        nomJeuLocal = savedNom;
+        ws.send(JSON.stringify({ evenement: 'rejoindre', donnees: { id: savedId, nomJeu: savedNom } }));
+      } else {
+        ws.send(JSON.stringify({ evenement: 'demander_apprenants' }));
+      }
+    };
 
     ws.onmessage = (e) => {
       const { evenement, donnees } = JSON.parse(e.data);
@@ -145,6 +155,8 @@
 
       if (evenement === 'en_attente_ok') {
         nomJeuLocal = donnees.nomJeu;
+        localStorage.setItem('quiz_id', idApprenant);
+        localStorage.setItem('quiz_nomJeu', nomJeuLocal);
         document.getElementById('nom-jeu-affiche').textContent = donnees.nomJeu;
         document.getElementById('affiche-nom-jeu').textContent = donnees.nomJeu;
         majTagsJoueurs([]);
@@ -153,6 +165,12 @@
 
       if (evenement === 'session_ok') {
         nomJeuLocal = donnees.nomJeu;
+        localStorage.setItem('quiz_id', idApprenant);
+        localStorage.setItem('quiz_nomJeu', nomJeuLocal);
+        if (donnees.score !== undefined) {
+          score = donnees.score;
+          document.getElementById('score-affiche').textContent = score + ' pts';
+        }
         document.getElementById('nom-jeu-affiche').textContent = donnees.nomJeu;
         document.getElementById('affiche-nom-jeu').textContent = donnees.nomJeu;
         majTagsJoueurs(donnees.joueurs || []);
@@ -164,7 +182,10 @@
       }
 
       if (evenement === 'erreur') {
+        localStorage.removeItem('quiz_id');
+        localStorage.removeItem('quiz_nomJeu');
         document.getElementById('erreur2').textContent = donnees.message;
+        afficher('vue-formulaire');
       }
 
       if (evenement === 'question') {

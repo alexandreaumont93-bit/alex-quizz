@@ -141,7 +141,7 @@ wss.on('connection', (ws) => {
         session.joueurRejoindre(sessionActive, donnees.id, donnees.id, donnees.nomJeu)
         wsJoueurs.set(donnees.id, ws)
         ws._enSession = true
-        envoyer(ws, 'session_ok', { nomJeu: donnees.nomJeu, joueurs: lobbyJoueurs() })
+        envoyer(ws, 'session_ok', { nomJeu: donnees.nomJeu, joueurs: lobbyJoueurs(), score: joueur.score || 0 })
 
         // Si la partie est déjà en cours, lui envoyer sa première question
         if (sessionActive.etat === 'en-cours') {
