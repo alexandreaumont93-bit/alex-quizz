@@ -208,12 +208,10 @@
 
       if (evenement === 'apprenants_disponibles') {
         apprenants = donnees.apprenants;
-        construireGrilleApprenants();
       }
 
       if (evenement === 'apprenant_pret') {
         apprenantsPrets[donnees.id] = { nomJeu: donnees.nomJeu, nomReel: donnees.nomReel };
-        majIndicateurPret(donnees.id);
         majConnectesAccueil();
       }
 
