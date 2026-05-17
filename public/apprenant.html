@@ -130,11 +130,12 @@
     }
 
     if (evenement === 'score_update') {
-      score  = donnees.score
+      score = donnees.score
       document.getElementById('score-affiche').textContent = score.toLocaleString() + ' pts'
-      const fb = document.getElementById('feedback')
+      const fb  = document.getElementById('feedback')
+      const signe = donnees.delta >= 0 ? '+' : ''
       fb.className = 'feedback ' + (donnees.correcte ? 'ok' : 'err')
-      fb.textContent = donnees.correcte ? '✓ Bonne réponse !' : '✗ Mauvaise réponse'
+      fb.textContent = (donnees.correcte ? '✓ ' : '✗ ') + signe + donnees.delta.toLocaleString() + ' pts'
     }
 
     if (evenement === 'timer') {

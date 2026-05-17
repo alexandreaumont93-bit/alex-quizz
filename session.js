@@ -65,11 +65,14 @@ function enregistrerReponse(session, id, questionIndex, optionChoisie, correcte,
   const joueur = session.joueurs.find(j => j.id === id)
   if (!joueur) return 0
   joueur.reponses.push({ questionIndex, optionChoisie, correcte, tempsMsReponse })
+  const scoreBefore = joueur.score
   if (correcte) {
-    const base = Math.round(500 + 500 * Math.max(0, 1 - tempsMsReponse / 15000))
-    joueur.score += base * difficulte
+    const vitesse = Math.max(0, 1 - tempsMsReponse / 10000)
+    joueur.score += Math.round((100 + 200 * vitesse) * difficulte)
+  } else {
+    joueur.score = Math.max(0, joueur.score - Math.round(250 * difficulte))
   }
-  return joueur.score
+  return { score: joueur.score, delta: joueur.score - scoreBefore }
 }
 
 function classement(session) {

@@ -169,8 +169,8 @@ wss.on('connection', (ws) => {
         const j = sessionActive.joueurs.find(p => p.id === ws._joueurId)
         if (!j) break
 
-        const difficulte  = j.difficulteEnCours || 1
-        const scoreActuel = session.enregistrerReponse(
+        const difficulte          = j.difficulteEnCours || 1
+        const { score, delta }    = session.enregistrerReponse(
           sessionActive, j.id,
           donnees.questionIndex, donnees.optionChoisie,
           donnees.correcte, donnees.tempsMsReponse,
@@ -178,13 +178,12 @@ wss.on('connection', (ws) => {
         )
         session.ajusterNiveau(j, donnees.correcte, donnees.tempsMsReponse)
 
-        // Score mis à jour envoyé à l'apprenant
-        envoyer(ws, 'score_update', { score: scoreActuel, correcte: donnees.correcte })
+        envoyer(ws, 'score_update', { score, delta, correcte: donnees.correcte })
 
         diffuserAuTeacher('reponse_recue', {
           nomJeu:     j.nomJeu,
           correcte:   donnees.correcte,
-          score:      scoreActuel,
+          score:      score,
           niveau:     Math.round(j.niveau),
           nbReponses: j.reponses.length,
         })
