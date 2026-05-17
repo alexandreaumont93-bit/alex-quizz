@@ -45,15 +45,6 @@
     select { padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.95rem; background: white; }
     .rangee { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
     .champ { display: flex; flex-direction: column; }
-    .apprenants-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem; }
-    .case-apprenant { background: #f8f8f8; border: 2px solid #e0e0e0; border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 0.6rem; transition: border-color 0.15s, background 0.15s; user-select: none; }
-    .case-apprenant:hover { border-color: #aaa; }
-    .case-apprenant.selectionne { border-color: #111; background: #f0f0f0; }
-    .case-apprenant .check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #ccc; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: transparent; }
-    .case-apprenant.selectionne .check { border-color: #111; background: #111; color: white; }
-    .case-apprenant .nom-apprenant { font-size: 0.9rem; font-weight: 500; color: #222; flex: 1; }
-    .pret-dot { width: 8px; height: 8px; border-radius: 50%; background: #27ae60; flex-shrink: 0; box-shadow: 0 0 0 3px rgba(39,174,96,0.2); }
-    .pret-surnom { font-size: 0.75rem; color: #27ae60; font-weight: 500; white-space: nowrap; }
 
     /* ── Écran 3 : Lobby ── */
     #ecran-lobby { max-width: 600px; }
@@ -152,9 +143,7 @@
           </select>
         </div>
       </div>
-      <label style="margin-bottom:0.6rem">Apprenants</label>
-      <div class="apprenants-grille" id="grille-apprenants"></div>
-      <button class="btn btn-principal" id="btn-creer" onclick="creerSession()" disabled>Créer la session</button>
+      <button class="btn btn-principal" onclick="creerSession()">Créer la session</button>
     </div>
   </div>
 
@@ -208,7 +197,6 @@
     const ws = new WebSocket(`${proto}://${window.location.host}`);
 
     let apprenants = [];
-    let selection = new Set();
     let typeJeuChoisi = null;
     let joueursDashboard = {};
     let apprenantsPrets = {}; // id → { nomJeu, nomReel }
@@ -290,30 +278,10 @@
     }
 
     function retourJeux() {
-      selection.clear();
       apprenantsPrets = {};
       joueursDashboard = {};
-      construireGrilleApprenants();
       majConnectesAccueil();
       afficher('ecran-jeux');
-    }
-
-    function construireGrilleApprenants() {
-      const grille = document.getElementById('grille-apprenants');
-      if (!grille) return;
-      grille.innerHTML = apprenants.map(a => {
-        const pret = apprenantsPrets[a.id];
-        return `
-        <div class="case-apprenant" id="case-${a.id}" onclick="toggleApprenant('${a.id}')">
-          <div class="check" id="check-${a.id}">✓</div>
-          <span class="nom-apprenant">${a.nom}</span>
-          <span id="pret-${a.id}" style="display:${pret ? 'flex' : 'none'}; align-items:center; gap:0.3rem">
-            <span class="pret-dot"></span>
-            <span class="pret-surnom">${pret ? pret.nomJeu : ''}</span>
-          </span>
-        </div>`;
-      }).join('');
-      document.getElementById('btn-creer').disabled = true;
     }
 
     function majConnectesAccueil() {
@@ -327,29 +295,10 @@
       ).join('');
     }
 
-    function majIndicateurPret(id) {
-      const el = document.getElementById(`pret-${id}`);
-      if (!el) return;
-      const pret = apprenantsPrets[id];
-      el.querySelector('.pret-surnom').textContent = pret.nomJeu;
-      el.style.display = 'flex';
-    }
-
-    function toggleApprenant(id) {
-      if (selection.has(id)) {
-        selection.delete(id);
-        document.getElementById(`case-${id}`).classList.remove('selectionne');
-      } else {
-        selection.add(id);
-        document.getElementById(`case-${id}`).classList.add('selectionne');
-      }
-      document.getElementById('btn-creer').disabled = selection.size === 0;
-    }
-
     function creerSession() {
       const nbQuestions = parseInt(document.getElementById('nbQuestions').value);
       sessionStorage.setItem('nbQuestions', nbQuestions);
-      ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: [...selection], typeJeu: typeJeuChoisi } }));
+      ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: apprenants.map(a => a.id), typeJeu: typeJeuChoisi } }));
     }
 
     function afficherLobby() {
