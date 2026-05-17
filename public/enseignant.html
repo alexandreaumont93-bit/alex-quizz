@@ -26,6 +26,14 @@
     .connectes-liste { display: flex; flex-wrap: wrap; gap: 0.5rem; }
     .connectes-titre { font-size: 0.75rem; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.6rem; }
 
+    /* ── Apprenants niveau config ── */
+    .apprenant-niv-ligne { display: flex; align-items: center; gap: 0.65rem; padding: 0.55rem 0.8rem; background: #f8f8f8; border-radius: 9px; margin-bottom: 0.4rem; }
+    .apprenant-niv-ligne.connecte { background: #f0faf4; }
+    .apprenant-niv-nom { flex: 1; font-size: 0.9rem; font-weight: 500; color: #ccc; }
+    .apprenant-niv-ligne.connecte .apprenant-niv-nom { color: #111; }
+    .apprenant-niv-alias { font-size: 0.75rem; color: #bbb; }
+    .niv-select { padding: 0.35rem 0.6rem; border: 1.5px solid #e0e0e0; border-radius: 7px; font-size: 0.82rem; background: white; cursor: pointer; color: #111; }
+
     /* ── Config ── */
     .retour { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; color: #999; cursor: pointer; margin-bottom: 1.25rem; background: none; border: none; padding: 0; }
     .retour:hover { color: #333; }
@@ -128,15 +136,10 @@
             <option value="15">15 minutes</option>
           </select>
         </div>
-        <div class="champ">
-          <label class="champ-label">Niveau de départ</label>
-          <select class="champ-select" id="niveauDepart">
-            <option value="1" selected>1 — Très facile</option>
-            <option value="2">2 — Facile</option>
-            <option value="3">3 — Intermédiaire</option>
-            <option value="5">5 — Avancé</option>
-          </select>
-        </div>
+      </div>
+      <div style="margin-bottom:1.25rem">
+        <div class="champ-label" style="margin-bottom:0.5rem">Apprenants — niveau de départ</div>
+        <div id="apprenants-niveaux"></div>
       </div>
       <button class="btn btn-principal" onclick="creerSession()">Créer la session</button>
     </div>
@@ -199,6 +202,21 @@
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
   const ws    = new WebSocket(`${proto}://${window.location.host}`)
 
+  const NIVEAUX_OPTS = [
+    [1,  'Niv. 1 — A1 (débutant)'],
+    [5,  'Niv. 5 — A2'],
+    [10, 'Niv. 10 — B1'],
+    [15, 'Niv. 15 — B1+'],
+    [20, 'Niv. 20 — B2'],
+    [25, 'Niv. 25 — C1'],
+    [30, 'Niv. 30 — C1+'],
+    [35, 'Niv. 35 — C2'],
+    [40, 'Niv. 40 — Expert'],
+  ]
+  function optsNiveau(val = 1) {
+    return NIVEAUX_OPTS.map(([v, l]) => `<option value="${v}" ${v == val ? 'selected' : ''}>${l}</option>`).join('')
+  }
+
   let apprenants     = []
   let joueursDash    = {}     // id → { nomReel, nomJeu, connecte, score, niveau, nbReponses, derniereRep }
   let apprenantsPrets = {}
@@ -216,12 +234,13 @@
     if (evenement === 'apprenant_pret') {
       apprenantsPrets[donnees.id] = { nomJeu: donnees.nomJeu, nomReel: donnees.nomReel }
       majConnectesAccueil()
+      majApprenantNiveaux()
     }
 
     if (evenement === 'session_creee') {
       joueursDash = {}
       donnees.joueurs.forEach(j => {
-        joueursDash[j.id] = { ...j, nomJeu: null, connecte: false, score: 0, niveau: configSession.niveauDepart || 1, nbReponses: 0, derniereRep: null }
+        joueursDash[j.id] = { ...j, nomJeu: null, connecte: false, score: 0, niveau: j.niveauDepart || 1, nbReponses: 0, derniereRep: null }
       })
       afficher('ecran-lobby')
       document.getElementById('nb-total').textContent = donnees.joueurs.length
@@ -276,18 +295,44 @@
   function allerConfig() {
     fetch('/api/dictionnaires').then(r => r.json()).then(dicos => {
       const sel = document.getElementById('source')
-      sel.innerHTML = dicos.map(d => `<option value="${d.nom}">${d.nom.replace(/_/g, ' ')} (${d.entrees} mots)</option>`).join('')
+      sel.innerHTML = dicos.map(d => {
+        const label = d.nom === 'tous' ? `Tous les dictionnaires (${d.entrees} mots)` : `${d.nom.replace(/_/g, ' ')} (${d.entrees} mots)`
+        return `<option value="${d.nom}">${label}</option>`
+      }).join('')
     }).catch(() => {})
+    majApprenantNiveaux()
     afficher('ecran-config')
+  }
+
+  function majApprenantNiveaux() {
+    const container = document.getElementById('apprenants-niveaux')
+    if (!container) return
+    const valeurs = {}
+    apprenants.forEach(a => { const el = document.getElementById(`niv-${a.id}`); if (el) valeurs[a.id] = el.value })
+    if (!apprenants.length) { container.innerHTML = '<p style="color:#bbb;font-size:0.85rem">Aucun apprenant enregistré.</p>'; return }
+    container.innerHTML = apprenants.map(a => {
+      const pret = apprenantsPrets[a.id]
+      const val  = valeurs[a.id] || 1
+      return `<div class="apprenant-niv-ligne ${pret ? 'connecte' : ''}">
+        <div class="dot" ${pret ? 'style="background:#27ae60;box-shadow:0 0 0 3px rgba(39,174,96,0.15)"' : ''}></div>
+        <span class="apprenant-niv-nom">${pret ? pret.nomJeu : a.nom}</span>
+        ${pret ? `<span class="apprenant-niv-alias">${a.nom}</span>` : ''}
+        <select class="niv-select" id="niv-${a.id}">${optsNiveau(val)}</select>
+      </div>`
+    }).join('')
   }
 
   function creerSession() {
     const source       = document.getElementById('source').value
     const dureeMinutes = parseInt(document.getElementById('dureeMinutes').value)
-    const niveauDepart = parseInt(document.getElementById('niveauDepart').value)
-    configSession = { source, dureeMinutes, niveauDepart }
+    const niveauxParJoueur = {}
+    apprenants.forEach(a => {
+      const el = document.getElementById(`niv-${a.id}`)
+      niveauxParJoueur[a.id] = el ? parseInt(el.value) || 1 : 1
+    })
+    configSession = { source, dureeMinutes, niveauxParJoueur }
     apprenantsPrets = {}
-    ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: apprenants.map(a => a.id), typeJeu: 'quiz', niveauDepart } }))
+    ws.send(JSON.stringify({ evenement: 'configurer_session', donnees: { slots: apprenants.map(a => a.id), typeJeu: 'quiz', niveauxParJoueur } }))
   }
 
   function lancerJeu() {

@@ -52,7 +52,7 @@ const _cache = {}
 
 function chargerSource(source) {
   if (_cache[source]) return _cache[source]
-  const entrees = dico.charger(source)
+  const entrees = source === 'tous' ? dico.chargerTous() : dico.charger(source)
   const toutes  = dico.chargerTous()
   _cache[source] = { entrees, toutes }
   return _cache[source]

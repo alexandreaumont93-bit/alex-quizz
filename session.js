@@ -8,10 +8,11 @@ function chargerApprenants() {
     .map(nom => ({ id: nom.toLowerCase().replace(/\s+/g, '-'), nom }))
 }
 
-function creerSession(slots, typeJeu = 'quiz', niveauDepart = 1) {
+function creerSession(slots, typeJeu = 'quiz', niveauDepart = 1, niveauxParJoueur = {}) {
   const apprenants = chargerApprenants()
   const joueurs = slots.map(id => {
     const apprenant = apprenants.find(a => a.id === id)
+    const niveau = niveauxParJoueur[id] || niveauDepart
     return {
       id,
       nomReel:             apprenant ? apprenant.nom : id,
@@ -19,8 +20,8 @@ function creerSession(slots, typeJeu = 'quiz', niveauDepart = 1) {
       socketId:            null,
       connecte:            false,
       score:               0,
-      niveau:              niveauDepart,
-      difficulteEnCours:   niveauDepart,
+      niveau,
+      difficulteEnCours:   niveau,
       tempsSecondesEnCours: 20,
       questionsVues:       new Set(),
       reponses:            [],

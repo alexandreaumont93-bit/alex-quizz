@@ -35,8 +35,10 @@ const serveur = http.createServer((req, res) => {
     return
   }
   if (req.method === 'GET' && req.url === '/api/dictionnaires') {
+    const dicos = dico.lister()
+    const total = dicos.reduce((s, d) => s + d.entrees, 0)
     res.writeHead(200, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify(dico.lister()))
+    res.end(JSON.stringify([{ nom: 'tous', entrees: total }, ...dicos]))
     return
   }
   const fichier = req.url === '/' ? '/rejoindre.html' : req.url
@@ -91,10 +93,11 @@ wss.on('connection', (ws) => {
         break
 
       case 'configurer_session': {
-        const niveauDepart = donnees.niveauDepart || 1
-        sessionActive = session.creerSession(donnees.slots, donnees.typeJeu, niveauDepart)
+        const niveauDepart     = donnees.niveauDepart || 1
+        const niveauxParJoueur = donnees.niveauxParJoueur || {}
+        sessionActive = session.creerSession(donnees.slots, donnees.typeJeu, niveauDepart, niveauxParJoueur)
         envoyer(ws, 'session_creee', {
-          joueurs: sessionActive.joueurs.map(j => ({ id: j.id, nomReel: j.nomReel, connecte: false }))
+          joueurs: sessionActive.joueurs.map(j => ({ id: j.id, nomReel: j.nomReel, connecte: false, niveauDepart: j.niveau }))
         })
         for (const joueur of sessionActive.joueurs) {
           const pret = joueursPrets.get(joueur.id)
