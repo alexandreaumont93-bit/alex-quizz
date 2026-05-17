@@ -151,9 +151,8 @@
       <div class="lobby-entete">
         <div>
           <h1>En attente des apprenants</h1>
-          <p class="sous-titre" style="margin-bottom:0">Partage le lien — lance quand tout le monde est là.</p>
+          <p class="sous-titre" style="margin-bottom:0">Partage le lien — lance quand tu es prêt.</p>
         </div>
-        <div class="compteur"><strong id="nb-connectes">0</strong> / <strong id="nb-total">0</strong> connectés</div>
       </div>
       <div class="lien-bloc" id="lien-bloc" style="display:none">
         <span class="lien-label">Lien apprenants</span>
@@ -243,7 +242,6 @@
         joueursDash[j.id] = { ...j, nomJeu: null, connecte: false, score: 0, niveau: j.niveauDepart || 1, nbReponses: 0, derniereRep: null }
       })
       afficher('ecran-lobby')
-      document.getElementById('nb-total').textContent = donnees.joueurs.length
       majCartes()
       fetch('/api/infos').then(r => r.json()).then(({ url }) => {
         document.getElementById('lien-url').textContent = url + '/rejoindre.html'
@@ -260,14 +258,16 @@
         joueursDash[donnees.id].connecte = true
       }
       majCartes()
-      document.getElementById('nb-connectes').textContent = Object.values(joueursDash).filter(j => j.connecte).length
+      document.getElementById('btn-lancer').disabled = false
+      const nb = Object.values(joueursDash).filter(j => j.connecte).length
+      const msg = document.getElementById('msg-attente')
+      msg.textContent = nb + ' apprenant' + (nb > 1 ? 's' : '') + ' connecté' + (nb > 1 ? 's' : '')
+      msg.classList.add('pret')
     }
 
     if (evenement === 'tous_connectes') {
-      document.getElementById('btn-lancer').disabled = false
       const msg = document.getElementById('msg-attente')
-      msg.textContent = 'Tout le monde est là — tu peux lancer !'
-      msg.classList.add('pret')
+      msg.textContent = 'Tout le monde est là !'
     }
 
     if (evenement === 'timer') {
