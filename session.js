@@ -70,7 +70,7 @@ function enregistrerReponse(session, id, questionIndex, optionChoisie, correcte,
     const vitesse = Math.max(0, 1 - tempsMsReponse / 10000)
     joueur.score += Math.round((100 + 200 * vitesse) * difficulte)
   } else {
-    joueur.score = Math.max(0, joueur.score - Math.round(250 * difficulte))
+    joueur.score = Math.max(0, joueur.score - Math.round(400 * difficulte))
   }
   return { score: joueur.score, delta: joueur.score - scoreBefore }
 }
