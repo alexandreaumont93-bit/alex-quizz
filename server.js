@@ -54,6 +54,7 @@ let sessionActive  = null
 let wsTeacher      = null
 const wsJoueurs    = new Map()
 const joueursPrets = new Map()
+const wsObservateurs = new Set()
 
 function envoyer(ws, evenement, donnees = {}) {
   if (ws && ws.readyState === ws.OPEN) ws.send(JSON.stringify({ evenement, donnees }))
@@ -66,6 +67,10 @@ function diffuserATous(evenement, donnees = {}) {
 }
 function diffuserAuTeacher(evenement, donnees = {}) {
   envoyer(wsTeacher, evenement, donnees)
+}
+function diffuserAuxObservateurs(evenement, donnees = {}) {
+  const msg = JSON.stringify({ ts: Date.now(), evenement, donnees })
+  wsObservateurs.forEach(ws => { if (ws.readyState === ws.OPEN) ws.send(msg) })
 }
 function lobbyJoueurs() {
   if (!sessionActive) return []
@@ -86,6 +91,12 @@ wss.on('connection', (ws) => {
         joueursPrets.forEach((j, id) => {
           diffuserAuTeacher('apprenant_pret', { id, nomReel: j.nomReel, nomJeu: j.nomJeu })
         })
+        break
+
+      case 'observateur_connecte':
+        wsObservateurs.add(ws)
+        ws._observateur = true
+        envoyer(ws, 'observateur_ok', { message: 'connecté' })
         break
 
       case 'demander_apprenants':
@@ -135,7 +146,13 @@ wss.on('connection', (ws) => {
         // Si la partie est déjà en cours, lui envoyer sa première question
         if (sessionActive.etat === 'en-cours') {
           const q = generateur.genererPourJoueur(joueur, sessionActive.config.source)
-          if (q) { joueur.difficulteEnCours = q.difficulte; joueur.tempsSecondesEnCours = q.tempsSecondes; envoyer(ws, 'question', q) }
+          if (q) {
+            joueur.difficulteEnCours    = q.difficulte
+            joueur.tempsSecondesEnCours = q.tempsSecondes
+            joueur.questionEnCours      = q
+            envoyer(ws, 'question', q)
+            diffuserAuxObservateurs('question_generee', { joueur: joueur.nomJeu || joueur.id, question: q })
+          }
         }
 
         wsJoueurs.forEach(ws2 => envoyer(ws2, 'lobby_update', { joueurs: lobbyJoueurs() }))
@@ -151,6 +168,15 @@ wss.on('connection', (ws) => {
         const dureeMinutes  = donnees.dureeMinutes || 5
         sessionActive.config = { source, dureeMinutes }
 
+        const genererEtObserver = (joueur, src) => {
+          const q = generateur.genererPourJoueur(joueur, src)
+          if (q) {
+            joueur.questionEnCours = q
+            diffuserAuxObservateurs('question_generee', { joueur: joueur.nomJeu || joueur.id, question: q })
+          }
+          return q
+        }
+
         renduJeu.demarrer(
           sessionActive,
           { source, dureeMinutes },
@@ -161,8 +187,9 @@ wss.on('connection', (ws) => {
             sessionActive.etat = 'termine'
             diffuserATous('partie_terminee', { classement })
             diffuserAuTeacher('partie_terminee', { classement })
+            diffuserAuxObservateurs('partie_terminee', { classement })
           },
-          generateur.genererPourJoueur
+          genererEtObserver
         )
         break
       }
@@ -192,12 +219,26 @@ wss.on('connection', (ws) => {
           nbReponses: j.reponses.length,
         })
 
+        diffuserAuxObservateurs('reponse_recue', {
+          joueur:        j.nomJeu || j.id,
+          correcte:      donnees.correcte,
+          optionChoisie: donnees.optionChoisie,
+          tempsMsReponse: donnees.tempsMsReponse,
+          delta,
+          score,
+          niveau:        Math.round(j.niveau),
+          nbReponses:    j.reponses.length,
+          question:      j.questionEnCours || null,
+        })
+
         // Question suivante immédiatement
         const q = generateur.genererPourJoueur(j, sessionActive.config.source)
         if (q) {
           j.difficulteEnCours      = q.difficulte
           j.tempsSecondesEnCours   = q.tempsSecondes
+          j.questionEnCours        = q
           envoyer(ws, 'question', q)
+          diffuserAuxObservateurs('question_generee', { joueur: j.nomJeu || j.id, question: q })
         }
         break
       }
@@ -206,6 +247,7 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     if (ws === wsTeacher) { wsTeacher = null; return }
+    if (ws._observateur) { wsObservateurs.delete(ws); return }
     const id = ws._joueurId
     if (!id) return
     joueursPrets.delete(id)
