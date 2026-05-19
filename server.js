@@ -34,6 +34,11 @@ const serveur = http.createServer((req, res) => {
     res.end(JSON.stringify({ url: host }))
     return
   }
+  if (req.method === 'GET' && req.url === '/api/observer') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({ actif: wsObservateurs.size > 0 }))
+    return
+  }
   if (req.method === 'GET' && req.url === '/api/dictionnaires') {
     const dicos = dico.lister()
     const total = dicos.reduce((s, d) => s + d.entrees, 0)

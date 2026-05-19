@@ -110,7 +110,13 @@
         <span class="lien-url" id="lien-url-accueil"></span>
         <button class="btn-copier" id="btn-copier-accueil" onclick="copierLienAccueil()">Copier</button>
       </div>
-      <button class="btn btn-principal" onclick="allerConfig()">Nouvelle partie →</button>
+      <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:1rem">
+        <button class="btn btn-principal" onclick="allerConfig()">Nouvelle partie →</button>
+        <span id="badge-observer" style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:20px;background:#f0f0f0;color:#999">
+          <span id="observer-dot" style="width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0"></span>
+          <span id="observer-label">Observer…</span>
+        </span>
+      </div>
       <div style="margin-top:1.25rem" id="section-connectes" style="display:none">
         <p class="connectes-titre">Apprenants connectés</p>
         <div class="connectes-liste" id="connectes-liste"></div>
@@ -447,6 +453,20 @@
   }).catch(() => {
     document.getElementById('lien-url-accueil').textContent = window.location.origin + '/rejoindre.html'
   })
+
+  function majObserver() {
+    fetch('/api/observer').then(r => r.json()).then(({ actif }) => {
+      const dot   = document.getElementById('observer-dot')
+      const label = document.getElementById('observer-label')
+      const badge = document.getElementById('badge-observer')
+      dot.style.background   = actif ? '#27ae60' : '#ccc'
+      label.textContent      = actif ? 'Observer actif' : 'Observer inactif'
+      badge.style.background = actif ? '#eafaf1' : '#f0f0f0'
+      badge.style.color      = actif ? '#1e8449' : '#999'
+    }).catch(() => {})
+  }
+  majObserver()
+  setInterval(majObserver, 10000)
 
   const ecrans = ['ecran-accueil', 'ecran-config', 'ecran-lobby', 'ecran-jeu', 'ecran-resultats']
   function afficher(id) {
