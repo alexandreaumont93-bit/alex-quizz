@@ -71,6 +71,29 @@
     .nom-cl { flex: 1; font-weight: 500; }
     .niv-cl { font-size: 0.75rem; background: #f0f0f0; color: #888; border-radius: 10px; padding: 0.15rem 0.5rem; }
     .score-cl { font-weight: 700; color: #333; }
+
+    .toast-levelup {
+      position: fixed;
+      bottom: 1.2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a1a2e;
+      color: #f0e68c;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 0.5rem 1.2rem;
+      border-radius: 999px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast-levelup.out {
+      opacity: 0;
+      transform: translateX(-50%) translateY(6px);
+    }
   </style>
 </head>
 <body>
@@ -150,6 +173,7 @@
       const signe = donnees.delta >= 0 ? '+' : ''
       fb.className = 'feedback ' + (donnees.correcte ? 'ok' : 'err')
       fb.textContent = (donnees.correcte ? '✓ ' : '✗ ') + signe + donnees.delta.toLocaleString() + ' pts'
+      if (donnees.levelUp && donnees.niveau) afficherToastNiveau(donnees.niveau)
     }
 
     if (evenement === 'timer') {
@@ -278,6 +302,17 @@
         prochainQuestion = null
       }
     }, 1500)
+  }
+
+  function afficherToastNiveau(n) {
+    const old = document.querySelector('.toast-levelup')
+    if (old) old.remove()
+    const t = document.createElement('div')
+    t.className = 'toast-levelup'
+    t.textContent = `⬆ Niveau ${n} !`
+    document.body.appendChild(t)
+    setTimeout(() => t.classList.add('out'), 1400)
+    setTimeout(() => t.remove(), 1800)
   }
 
   function surlignerMot(texte, mot) {
