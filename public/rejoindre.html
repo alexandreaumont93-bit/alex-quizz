@@ -76,8 +76,8 @@
     body.shake { animation: shake 0.5s ease; }
 
     /* ── Toast level-up ── */
-    #toast-levelup { position: fixed; top: 44%; left: 50%; transform: translate(-50%, -50%) scale(0.85); background: linear-gradient(135deg, #1a252f, #2980b9); color: white; font-size: 1.5rem; font-weight: 700; padding: 1rem 2rem; border-radius: 16px; pointer-events: none; z-index: 999; opacity: 0; transition: opacity 0.25s, transform 0.25s; text-align: center; white-space: nowrap; }
-    #toast-levelup.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    #toast-levelup { position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%) translateY(4px); background: #1a1a2e; color: #f0e68c; font-size: 1rem; font-weight: 700; padding: 0.5rem 1.2rem; border-radius: 999px; pointer-events: none; z-index: 999; opacity: 0; transition: opacity 0.3s, transform 0.3s; white-space: nowrap; box-shadow: 0 4px 14px rgba(0,0,0,0.2); }
+    #toast-levelup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     /* ── Résultats ── */
     #vue-resultats { text-align: center; width: 100%; max-width: 600px; }
